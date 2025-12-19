@@ -1,0 +1,41 @@
+name: Mad Scientist Daily Factory
+
+on:
+  schedule:
+    # Roz subah 5:30 AM UTC (yani India me 11:00 AM subah) chalega
+    - cron: '30 5 * * *'
+  workflow_dispatch: # Ye button hai taaki tu abhi hath se test kar sake
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Ye zaroori hai taaki Robot file save kar sake
+
+    steps:
+      - name: Checkout Code (Code uthao)
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Libraries
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Factory (Product Banao)
+        env:
+          # Yaha hum Secret ko Python script me bhej rahe hain
+          API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python factory.py
+
+      - name: Save New Product (Commit & Push)
+        run: |
+          git config --global user.name 'Mad Scientist Bot'
+          git config --global user.email 'bot@noreply.github.com'
+          git add *.html inventory.txt
+          git commit -m "New Product Generated via Automation" || echo "No changes to commit"
+          git push
