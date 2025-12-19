@@ -4,7 +4,7 @@ import os
 import re  # Naya Guard: Regex for cleaning names
 
 # --- SETUP ---
-API_KEY = "TERI_API_KEY_DAAL"
+API_KEY = os.environ["API_KEY"] # Ye ab GitHub ke Secret vault se key uthayega
 INVENTORY_FILE = "inventory.txt"
 
 print("\n--- 🏭 DIGITAL PRODUCT FACTORY (SAFE MODE) ---")
