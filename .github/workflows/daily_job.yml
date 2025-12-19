@@ -38,4 +38,8 @@ jobs:
           git config --global user.email 'bot@noreply.github.com'
           git add *.html inventory.txt
           git commit -m "New Product Generated via Automation" || echo "No changes to commit"
+          # --- ERROR FIXING LINE ---
+          git pull --rebase origin main
+          # -------------------------
           git push
+
