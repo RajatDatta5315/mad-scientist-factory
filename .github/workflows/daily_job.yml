@@ -2,11 +2,11 @@ name: Mad Scientist Daily Factory
 
 on:
   schedule:
-    - cron: '30 5 * * *' # Subah 11 AM India Time
+    - cron: '30 5 * * *' # Subah 10:30/11:00 AM India Time
   workflow_dispatch: # Manual Button
 
 permissions:
-  contents: write # Ye line bahut zaroori hai
+  contents: write # Likhne ki permission
 
 jobs:
   build:
@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # Pura history download karega taaki error na aaye
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -33,20 +31,12 @@ jobs:
         run: |
           python factory.py
 
-      - name: Force Save & Upload
+      - name: Force Save & Upload (Bahubali Mode)
         run: |
           git config --global user.name 'Mad Scientist Bot'
           git config --global user.email 'bot@noreply.github.com'
-          
-          # 1. Pehle latest changes kheecho (Merge strategy)
-          git pull origin main --no-edit
-          
-          # 2. Files add karo
           git add *.html inventory.txt
-          
-          # 3. Commit karo (Agar kuch naya hai to)
-          git commit -m "New Product Generated via Automation" || echo "Kuch naya nahi hai save karne ko"
-          
-          # 4. Push karo
-          git push origin main
+          git commit -m "New Product Generated" || echo "Kuch naya nahi hai"
+          # Ye -f flag sabse important hai. Ye zabardasti upload karega.
+          git push -f origin main
 
