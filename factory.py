@@ -1,3 +1,4 @@
+
 import requests
 import json
 import os
@@ -16,7 +17,7 @@ API_KEY = os.environ["API_KEY"]
 INVENTORY_FILE = "inventory.txt"
 
 # --- 2. CONNECT (FORCE STABLE MODEL) ---
-# Hum auto-detect nahi karenge, seedha 1.5 Flash use karenge jo fast aur stable hai
+# YAHAN DEKH: Humne 2.5 ko hata ke 1.5 fix kar diya hai.
 MY_MODEL = "models/gemini-1.5-flash"
 print(f"🔒 Locked to Stable Model: {MY_MODEL}")
 
@@ -49,6 +50,10 @@ try:
         sys.exit(1)
         
     data = r.json()
+    if 'candidates' not in data:
+         print("❌ Brain refused to give Idea. Retrying...")
+         sys.exit(1)
+
     new_product_idea = data['candidates'][0]['content']['parts'][0]['text'].strip()
     # Name Cleaning
     new_product_idea = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product_idea)
@@ -69,7 +74,6 @@ Return ONLY raw HTML.
 """
 
 payload = {"contents": [{"parts": [{"text": design_prompt}]}]}
-# Thoda delay taaki Google block na kare
 time.sleep(2) 
 r = requests.post(url, headers=headers, data=json.dumps(payload))
 
@@ -83,6 +87,7 @@ try:
     # DEBUGGING: Agar 'candidates' nahi aaya to error print karo
     if 'candidates' not in response_json:
         print(f"❌ GOOGLE REFUSED TO GENERATE CODE.")
+        print(f"Reason likely: Safety Filter on 2.5 Flash. Switched to 1.5 Flash.")
         print(f"Full Response: {response_json}")
         sys.exit(1)
 
@@ -102,4 +107,3 @@ try:
 except Exception as e:
     print(f"❌ Code Generation Failed: {e}")
     sys.exit(1)
-
