@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agency Master Service Agreement</title>
+    <style>
+        /* General Body Styling for Dark Mode */
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Container for the Agreement Content */
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #1a1a1a; /* Slightly lighter dark for content */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Headings */
+        h1, h2, h3 {
+            color: #ffffff;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        p, ul, ol, li {
+            margin-bottom: 1em;
+        }
+
+        ul, ol {
+            padding-left: 25px;
+        }
+
+        /* Editable Content Styling */
+        [contenteditable="true"] {
+            outline: none; /* Remove default browser outline */
+            border-bottom: 1px dashed #444; /* Subtle hint that it's editable */
+            padding-bottom: 2px;
+            min-height: 1.2em; /* Ensure visible height for empty editable areas */
+            display: inline-block; /* Allows border-bottom to work on inline spans */
+            min-width: 50px; /* Smallest editable area */
+            line-height: inherit; /* Maintain consistent line height */
+        }
+
+        /* Adjustments for block-level editable elements like paragraphs */
+        p[contenteditable="true"], ul[contenteditable="true"], ol[contenteditable="true"] {
+            display: block; /* Restore block display for paragraphs, lists */
+            border-bottom: none; /* No border for entire paragraphs, let inner spans handle it */
+            min-width: unset; /* Don't force min-width on block elements */
+        }
+        
+        /* Make individual editable spans within paragraphs more prominent */
+        p span[contenteditable="true"] {
+            border-bottom: 1px dashed #6bb9f0; /* Slightly more visible border for specific fields */
+            min-width: 120px; /* Ensure space for input */
+        }
+
+        [contenteditable="true"]:hover {
+            background-color: #2a2a2a; /* Light background on hover for editable areas */
+        }
+
+        [contenteditable="true"]:focus {
+            border-bottom-color: #6bb9f0; /* Blue border on focus */
+            background-color: #2a2a2a;
+        }
+
+        /* Signature Area */
+        .signature-block {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 60px;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 40px; /* Space between signature parties */
+        }
+
+        .signature-party {
+            flex: 1;
+            min-width: 300px; /* Ensure sufficient width for each signature */
+            box-sizing: border-box;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
+            margin-top: 70px; /* Space for actual signature */
+            min-height: 20px; /* Ensure line is visible */
+        }
+        .signature-text {
+            margin-top: 10px;
+            line-height: 1.8;
+        }
+        .signature-text span[contenteditable="true"] {
+             border-bottom: 1px dashed #444;
+             padding-bottom: 2px;
+             min-width: 150px; /* Ensure width for editable fields */
+             display: inline-block;
+        }
+
+
+        /* Print Button Styling */
+        .print-button {
+            display: block;
+            margin: 40px auto;
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .print-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Print Media Queries */
+        @media print {
+            body {
+                background-color: white;
+                color: black;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+                margin: 0;
+                padding: 0;
+                background-color: white;
+            }
+            .print-button {
+                display: none; /* Hide the button when printing */
+            }
+            h1, h2, h3 {
+                color: black;
+            }
+            [contenteditable="true"] {
+                border-bottom: none !important; /* Remove dashed border for print */
+                background-color: transparent !important; /* No background changes */
+                outline: none !important;
+                padding: 0;
+            }
+            .signature-line {
+                 border-color: black !important;
+            }
+            .signature-block {
+                gap: 0;
+            }
+            .signature-party {
+                page-break-inside: avoid; /* Prevent signature block from splitting across pages */
+                margin-right: 0;
+                padding-right: 0;
+            }
+            .signature-party:first-child {
+                border-right: 1px dotted #ccc; /* Add a subtle separator for print */
+                padding-right: 40px; /* Match gap */
+            }
+            .signature-party:last-child {
+                padding-left: 40px; /* Balance the separator */
+            }
+            p span[contenteditable="true"] {
+                min-width: 0; /* No min-width on print */
+            }
+            p[contenteditable="true"], ul[contenteditable="true"], ol[contenteditable="true"] {
+                display: block; /* Ensure block display for print */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Agency Master Service Agreement</h1>
+
+        <h2 contenteditable="true">1. Introduction</h2>
+        <p>This Master Service Agreement ("Agreement") is made and entered into as of <span contenteditable="true">Month Day, Year</span> (the "Effective Date"), by and between <span contenteditable="true">Your Agency Name</span>, a <span contenteditable="true">Type of Entity (e.g., LLC, Corporation)</span>, with its principal place of business at <span contenteditable="true">Your Agency Address</span> ("Agency"), and <span contenteditable="true">Client Company Name</span>, a <span contenteditable="true">Type of Entity (e.g., LLC, Corporation)</span>, with its principal place of business at <span contenteditable="true">Client Company Address</span> ("Client").</p>
+        <p contenteditable="true">Agency and Client may be referred to individually as a "Party" and collectively as the "Parties."</p>
+
+        <h2 contenteditable="true">2. Purpose of Agreement</h2>
+        <p contenteditable="true">This Agreement sets forth the general terms and conditions under which Agency will provide various marketing, design, development, and/or other related services to Client. Specific details regarding the scope of work, deliverables, timelines, and fees for each project will be outlined in separate Statements of Work ("SOWs") or project proposals, which shall incorporate the terms of this Agreement by reference.</p>
+
+        <h2 contenteditable="true">3. Services</h2>
+        <p contenteditable="true">Agency agrees to provide services as described in mutually agreed-upon SOWs. Each SOW will include, but not be limited to:</p>
+        <ul>
+            <li contenteditable="true">Description of Services</li>
+            <li contenteditable="true">Deliverables</li>
+            <li contenteditable="true">Project Timeline</li>
+            <li contenteditable="true">Fees and Payment Schedule</li>
+            <li contenteditable="true">Specific responsibilities of each Party</li>
+        </ul>
+
+        <h2 contenteditable="true">4. Fees and Payment</h2>
+        <p>Client agrees to pay Agency the fees specified in each SOW. Unless otherwise stated in an SOW, all invoices are due and payable within <span contenteditable="true">thirty (30)</span> days from the invoice date. Late payments may incur interest at a rate of <span contenteditable="true">1.5%</span> per month or the maximum rate permitted by law, whichever is less.</p>
+
+        <h2 contenteditable="true">5. Term and Termination</h2>
+        <p>This Agreement shall commence on the Effective Date and remain in full force and effect until terminated by either Party. Either Party may terminate this Agreement for any reason upon <span contenteditable="true">thirty (30)</span> days written notice to the other Party. In the event of termination, Client shall pay Agency for all services performed and expenses incurred up to the termination date, subject to any prior written agreements for specific project cancellation clauses.</p>
+
+        <h2 contenteditable="true">6. Confidentiality</h2>
+        <p>Both Parties agree to keep confidential all non-public information received from the other Party during the course of this Agreement ("Confidential Information"). This obligation includes, but is not limited to, business plans, financial information, client lists, and technical data. This obligation shall survive the termination of this Agreement for a period of <span contenteditable="true">five (5) years</span>.</p>
+
+        <h2 contenteditable="true">7. Intellectual Property</h2>
+        <p>Upon full payment of all fees due under an SOW, Client shall own all rights, title, and interest in and to the final deliverables created by Agency specifically for Client under that SOW. Agency retains the right to use such deliverables for promotional and portfolio purposes unless otherwise agreed in writing within an SOW.</p>
+        <p contenteditable="true">Agency retains ownership of any pre-existing intellectual property, tools, methodologies, or generic templates used in the creation of deliverables, granting Client a non-exclusive, non-transferable license to use such elements solely in conjunction with the deliverables.</p>
+
+        <h2 contenteditable="true">8. Warranties and Disclaimers</h2>
+        <p contenteditable="true">Agency warrants that it will perform the services in a professional and workmanlike manner, consistent with industry standards. EXCEPT AS EXPRESSLY PROVIDED IN THIS AGREEMENT, AGENCY DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.</p>
+
+        <h2 contenteditable="true">9. Limitation of Liability</h2>
+        <p>IN NO EVENT SHALL EITHER PARTY BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR FOR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM (A) YOUR ACCESS TO OR USE OF OR INABILITY TO ACCESS OR USE THE SERVICES; (B) ANY CONDUCT OR CONTENT OF ANY THIRD PARTY ON THE SERVICES; OR (C) UNAUTHORIZED ACCESS, USE OR ALTERATION OF YOUR TRANSMISSIONS OR CONTENT. THE TOTAL AGGREGATE LIABILITY OF AGENCY TO CLIENT FOR ANY CLAIM ARISING OUT OF OR IN CONNECTION WITH THIS AGREEMENT SHALL NOT EXCEED THE TOTAL FEES PAID BY CLIENT TO AGENCY UNDER THE APPLICABLE SOW DURING THE <span contenteditable="true">six (6) months</span> IMMEDIATELY PRECEDING THE EVENT GIVING RISE TO THE CLAIM.</p>
+
+        <h2 contenteditable="true">10. Governing Law</h2>
+        <p>This Agreement shall be governed by and construed in accordance with the laws of the State of <span contenteditable="true">State, Country</span>, without regard to its conflict of laws principles.</p>
+
+        <h2 contenteditable="true">11. Entire Agreement</h2>
+        <p contenteditable="true">This Agreement, together with any executed SOWs, constitutes the entire agreement between the Parties and supersedes all prior and contemporaneous agreements, proposals, or representations, written or oral, concerning its subject matter.</p>
+
+        <h2 contenteditable="true">12. Signatures</h2>
+        <div class="signature-block">
+            <div class="signature-party">
+                <p><strong>FOR AGENCY:</strong></p>
+                <div class="signature-line" contenteditable="true"></div>
+                <div class="signature-text">
+                    <p>Name: <span contenteditable="true"></span></p>
+                    <p>Title: <span contenteditable="true"></span></p>
+                    <p>Date: <span contenteditable="true"></span></p>
+                </div>
+            </div>
+            <div class="signature-party">
+                <p><strong>FOR CLIENT:</strong></p>
+                <div class="signature-line" contenteditable="true"></div>
+                <div class="signature-text">
+                    <p>Name: <span contenteditable="true"></span></p>
+                    <p>Title: <span contenteditable="true"></span></p>
+                    <p>Date: <span contenteditable="true"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="print-button" onclick="window.print()">Print to PDF</button>
+</body>
+</html>
