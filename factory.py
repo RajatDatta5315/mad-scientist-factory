@@ -11,7 +11,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-print("--- 🏭 STARTING FACTORY (DIRECT TARGET MODE) ---")
+print("--- 🏭 STARTING FACTORY (GEMINI 2.0 + SAFETY OFF) ---")
 
 # 👇👇👇 PASTE KEY HERE 👇👇👇
 API_KEY = "AIzaSyBttt7j1uFig01pysOf2gv9G2_URJufmvw" 
@@ -24,50 +24,31 @@ if "YAHAN" in API_KEY:
 INVENTORY_FILE = "inventory.txt"
 WEBSITE_FILE = "index.html"
 
-# --- 1. CONNECT (TARGET SPECIFIC MODELS) ---
-# Hum robotics ya preview models ko touch bhi nahi karenge.
-# Sirf ye 5 try karenge jo TEXT likhte hain.
-TARGET_MODELS = [
-    "models/gemini-1.5-flash",
-    "models/gemini-1.5-flash-latest",
-    "models/gemini-1.5-flash-001",
-    "models/gemini-1.5-pro",
-    "models/gemini-pro"
-]
-
-WORKING_MODEL = None
-print("🔍 Testing Text Models...")
-
-for model in TARGET_MODELS:
-    url = f"https://generativelanguage.googleapis.com/v1beta/{model}:generateContent?key={API_KEY}"
-    headers = {'Content-Type': 'application/json'}
-    payload = {"contents": [{"parts": [{"text": "Hi"}]}]}
-    
-    try:
-        print(f"👉 Testing {model}...")
-        r = requests.post(url, headers=headers, data=json.dumps(payload))
-        if r.status_code == 200:
-            print(f"✅ LOCKED ON: {model}")
-            WORKING_MODEL = model
-            break
-        else:
-            print(f"⚠️ Failed: {r.status_code}")
-    except:
-        print("⚠️ Connection Error")
-        continue
-
-if not WORKING_MODEL:
-    print("❌ ALL TARGETS FAILED. API Key check kar ya Quota khatam ho gaya hai.")
-    sys.exit(1)
+# --- 1. CONNECT (FORCE GEMINI 2.0) ---
+# 1.5 dead hai, to hum seedha 2.0 Exp use karenge jo tere account mein hai.
+WORKING_MODEL = "models/gemini-2.0-flash-exp"
+print(f"🔒 Locked on: {WORKING_MODEL}")
 
 def generate(prompt):
     url = f"https://generativelanguage.googleapis.com/v1beta/{WORKING_MODEL}:generateContent?key={API_KEY}"
     headers = {'Content-Type': 'application/json'}
-    payload = {"contents": [{"parts": [{"text": prompt}]}]}
+    
+    # 🔥 SAFETY OFF: Taki model "Build Failed" na kare
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "safetySettings": [
+            { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
+            { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" },
+            { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" },
+            { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" }
+        ]
+    }
+    
     try:
         r = requests.post(url, headers=headers, data=json.dumps(payload))
         return r.json()
-    except:
+    except Exception as e:
+        print(f"⚠️ Request Error: {e}")
         return None
 
 # --- 2. RESEARCH ---
@@ -88,8 +69,9 @@ Return ONLY the Name.
 data = generate(research_prompt)
 
 if not data or 'candidates' not in data:
-    print("❌ Research Failed. Using Backup.")
-    new_product_idea = "Agency_Social_Media_Policy_Template"
+    print(f"❌ Research Failed. Response: {data}")
+    # Fallback agar model fail ho
+    new_product_idea = "Agency_Performance_Review_Template"
 else:
     new_product_idea = data['candidates'][0]['content']['parts'][0]['text'].strip()
     new_product_idea = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product_idea)
@@ -105,11 +87,11 @@ Feature: Large 'DOWNLOAD AS PDF' button (window.print).
 Feature: Editable content.
 Return ONLY raw HTML.
 """
-time.sleep(1)
+time.sleep(2) # Thoda saans lene do model ko
 data = generate(design_prompt)
 
 if not data or 'candidates' not in data:
-    print("❌ Build Failed.")
+    print(f"❌ Build Failed. Response: {data}")
     sys.exit(1)
 
 html_code = data['candidates'][0]['content']['parts'][0]['text'].replace("```html", "").replace("```", "")
@@ -132,7 +114,7 @@ TWITTER: [text]
 INSTAGRAM: [text]
 FACEBOOK: [text]
 """
-time.sleep(1)
+time.sleep(2)
 data = generate(marketing_prompt)
 marketing_text = data['candidates'][0]['content']['parts'][0]['text']
 
