@@ -25,7 +25,11 @@ jobs:
         run: |
           pip install requests
 
-      - name: Run Factory
+            - name: Run Factory
+        env:  # <-- YE ADD KARNA HAI
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          TARGET_EMAIL: ${{ secrets.TARGET_EMAIL }}
         run: |
           python factory.py
 
