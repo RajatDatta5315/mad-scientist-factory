@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Performance Report</title>
+    <style>
+        /* General Body Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; /* Dark background */
+            color: #f0f0f0; /* Light text */
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        /* Container for the report content */
+        .report-container {
+            max-width: 1000px;
+            margin: 20px auto;
+            background-color: #1e1e1e; /* Slightly lighter dark for content area */
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+        }
+
+        /* Headings */
+        h1, h2, h3 {
+            color: #00bcd4; /* A vibrant light blue/cyan for emphasis */
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333; /* Subtle separator */
+        }
+
+        h1 {
+            font-size: 2.8em;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #00bcd4;
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 2em;
+            margin-top: 40px;
+            border-bottom: 1px solid #00bcd4;
+        }
+
+        h3 {
+            font-size: 1.5em;
+            margin-top: 30px;
+        }
+
+        /* Paragraphs and general text */
+        p {
+            margin-bottom: 15px;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Editable Content Styling */
+        span[contenteditable="true"] {
+            border-bottom: 1px dotted #555; /* Dotted line to indicate editability */
+            padding: 2px 0;
+            display: inline-block;
+            min-width: 50px; /* Ensures space for editing */
+            cursor: text;
+        }
+
+        span[contenteditable="true"]:focus {
+            outline: none;
+            border-bottom: 1px solid #00bcd4; /* Highlight on focus */
+            background-color: #2a2a2a; /* Slightly lighter background on focus */
+            border-radius: 2px;
+        }
+
+        /* Button Styling - Download as PDF */
+        #download-pdf-button {
+            position: fixed; /* Fixed position relative to viewport */
+            top: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            background-color: #4CAF50; /* Green for download action */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000; /* Ensure it's above other content */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        #download-pdf-button:hover {
+            background-color: #45a049; /* Slightly darker green on hover */
+            transform: translateY(-2px); /* Slight lift effect */
+        }
+
+        #download-pdf-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Flexbox for Key Metrics */
+        .key-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+            justify-content: space-around; /* Distribute items evenly */
+            text-align: center;
+        }
+
+        .metric-card {
+            background-color: #2a2a2a; /* Darker card background */
+            padding: 20px;
+            border-radius: 8px;
+            flex: 1; /* Allow cards to grow/shrink */
+            min-width: 200px;
+            max-width: 30%; /* Three cards per row on larger screens */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .metric-card h3 {
+            color: #00bcd4;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+            border-bottom: none;
+        }
+
+        .metric-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #e0e0e0;
+        }
+
+        .metric-card .label {
+            font-size: 0.9em;
+            color: #bbb;
+        }
+
+        /* Media Print Styles (CRITICAL: Hide button for print) */
+        @media print {
+            body {
+                background-color: white !important; /* White background for printing */
+                color: black !important; /* Black text for readability on paper */
+                padding: 0;
+            }
+            .report-container {
+                margin: 0;
+                padding: 30px;
+                box-shadow: none;
+                background-color: white !important;
+                border-radius: 0;
+                width: 100%; /* Ensure it fills page width for print */
+            }
+            #download-pdf-button {
+                display: none !important; /* Hide the button when printing */
+            }
+            h1, h2, h3 {
+                color: #333 !important; /* Darken headings for better contrast on print */
+                border-color: #ccc !important;
+            }
+            span[contenteditable="true"] {
+                border-bottom: none !important; /* Hide dotted line when printing */
+                background-color: transparent !important;
+                padding: 0;
+            }
+            .key-metrics .value, .key-metrics .label {
+                color: #333 !important; /* Darken metric text for print */
+            }
+            .metric-card {
+                background-color: #f0f0f0 !important; /* Lighter card background for print */
+                box-shadow: none !important;
+                border: 1px solid #eee; /* Add a subtle border */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CRITICAL FEATURE: DOWNLOAD AS PDF Button -->
+    <button id="download-pdf-button" onclick="window.print()">DOWNLOAD AS PDF</button>
+
+    <div class="report-container">
+        <h1>Client Performance Report</h1>
+
+        <section id="overview">
+            <h2>Overview for <span contenteditable="true">Client Name Inc.</span></h2>
+            <p>
+                This report provides a comprehensive overview of <span contenteditable="true">Client Name Inc.'s</span> performance during the period of
+                <span contenteditable="true">January 1, 2023</span> to <span contenteditable="true">March 31, 2023</span>.
+                The focus of this quarter was on <span contenteditable="true">improving customer engagement and expanding market reach</span>.
+                We observed <span contenteditable="true">significant growth in key areas</span>,
+                while also identifying <span contenteditable="true">opportunities for further optimization</span>.
+            </p>
+            <p>
+                Prepared by: <span contenteditable="true">Your Agency Name</span> on <span contenteditable="true">April 5, 2023</span>.
+            </p>
+        </section>
+
+        <section id="key-metrics">
+            <h2>Key Performance Indicators (KPIs)</h2>
+            <div class="key-metrics">
+                <div class="metric-card">
+                    <h3>Revenue Growth</h3>
+                    <div class="value"><span contenteditable="true">+15</span>%</div>
+                    <div class="label">vs. Previous Quarter</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Customer Acquisition</h3>
+                    <div class="value"><span contenteditable="true">2,500</span></div>
+                    <div class="label">New Clients</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Engagement Rate</h3>
+                    <div class="value"><span contenteditable="true">8.2</span>%</div>
+                    <div class="label">Average Session Rate</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Conversion Rate</h3>
+                    <div class="value"><span contenteditable="true">3.1</span>%</div>
+                    <div class="label">Website Conversion</div>
+                </div>
+                <div class="metric-card">
+                    <h3>Client Retention</h3>
+                    <div class="value"><span contenteditable="true">92</span>%</div>
+                    <div class="label">Quarterly Retention</div>
+                </div>
+                <div class="metric-card">
+                    <h3>ROI</h3>
+                    <div class="value"><span contenteditable="true">250</span>%</div>
+                    <div class="label">Return on Investment</div>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 30px; font-style: italic; color: #aaa;">
+                <span contenteditable="true">All metrics are based on data collected from Google Analytics and CRM systems.</span>
+            </p>
+        </section>
+
+        <section id="achievements">
+            <h2>Quarterly Achievements</h2>
+            <ul>
+                <li>Successfully launched <span contenteditable="true">Product X with a 20% increase in initial sales</span>.</li>
+                <li>Increased social media reach by <span contenteditable="true">30% through targeted campaigns</span>.</li>
+                <li>Achieved a <span contenteditable="true">5-star rating on Customer Review Platform Y</span> with 150 new reviews.</li>
+                <li>Streamlined <span contenteditable="true">onboarding process, reducing setup time by 15%</span>.</li>
+            </ul>
+        </section>
+
+        <section id="challenges">
+            <h2>Challenges & Areas for Improvement</h2>
+            <ul>
+                <li>Identified a slight dip in engagement on <span contenteditable="true">mobile devices (down 2%)</span>.</li>
+                <li>Higher than anticipated cost per acquisition in <span contenteditable="true">Region Z during specific weeks</span>.</li>
+                <li>Need to optimize content for <span contenteditable="true">long-tail keywords to capture niche audiences</span>.</li>
+            </ul>
+        </section>
+
+        <section id="recommendations">
+            <h2>Recommendations for Next Quarter</h2>
+            <p>Based on our analysis, we recommend the following strategies for the upcoming quarter:</p>
+            <ol>
+                <li>Implement a <span contenteditable="true">mobile-first content strategy and responsive design audit</span>.</li>
+                <li>Review and refine <span contenteditable="true">ad targeting and bidding strategies for Region Z</span>.</li>
+                <li>Develop a series of <span contenteditable="true">blog posts and guides focusing on specific long-tail keywords</span>.</li>
+                <li>Explore new partnership opportunities to <span contenteditable="true">expand reach in untapped markets</span>.</li>
+            </ol>
+            <p>
+                We believe these actions will further enhance <span contenteditable="true">Client Name Inc.'s</span> performance and help achieve
+                the goals set for the next period.
+            </p>
+        </section>
+
+        <footer>
+            <p style="text-align: center; margin-top: 50px; font-size: 0.9em; color: #888;">
+                &copy; <span contenteditable="true">2023 Your Agency Name.</span> All rights reserved.
+            </p>
+        </footer>
+    </div>
+
+</body>
+</html>
