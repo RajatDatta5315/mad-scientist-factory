@@ -11,7 +11,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-print("--- 🏭 STARTING FACTORY (NO LINKEDIN MODE) ---")
+print("--- 🏭 STARTING FACTORY (NO 2.5 ALLOWED) ---")
 
 # 👇👇👇 PASTE KEY HERE 👇👇👇
 API_KEY = "AIzaSyBttt7j1uFig01pysOf2gv9G2_URJufmvw" 
@@ -24,20 +24,31 @@ if "YAHAN" in API_KEY:
 INVENTORY_FILE = "inventory.txt"
 WEBSITE_FILE = "index.html"
 
-# --- 1. CONNECT ---
+# --- 1. CONNECT (WITH ANTI-2.5 FILTER) ---
+print("🔍 Scanning for Stable Brain...")
 list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}"
-WORKING_MODEL = "models/gemini-1.5-flash"
+WORKING_MODEL = "models/gemini-1.5-flash" # Fallback
+
 try:
     response = requests.get(list_url)
     if response.status_code == 200:
         data = response.json()
         for m in data.get('models', []):
+            name = m['name']
+            
+            # 🚫 BOUNCER LOGIC: 2.5 ko skip karo
+            if "2.5" in name:
+                print(f"🚫 Skipping Unstable Model: {name}")
+                continue
+                
             if 'generateContent' in m.get('supportedGenerationMethods', []):
-                WORKING_MODEL = m['name']
+                WORKING_MODEL = name
+                print(f"✅ Found Stable Model: {name}")
                 break
 except:
     pass
-print(f"✅ Connected: {WORKING_MODEL}")
+
+print(f"🔒 Locked on: {WORKING_MODEL}")
 
 def generate(prompt):
     url = f"https://generativelanguage.googleapis.com/v1beta/{WORKING_MODEL}:generateContent?key={API_KEY}"
@@ -65,8 +76,13 @@ Name format: Clean, Simple, Professional. No special chars.
 Return ONLY the Name.
 """
 data = generate(research_prompt)
-new_product_idea = data['candidates'][0]['content']['parts'][0]['text'].strip()
-new_product_idea = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product_idea)
+if not data or 'candidates' not in data:
+    print("❌ Research Failed (Google Refused). Retrying with backup...")
+    new_product_idea = "Agency_Client_Onboarding_Checklist"
+else:
+    new_product_idea = data['candidates'][0]['content']['parts'][0]['text'].strip()
+    new_product_idea = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product_idea)
+
 print(f"💡 Idea: {new_product_idea}")
 
 # --- 3. BUILD HTML ---
@@ -80,22 +96,26 @@ Return ONLY raw HTML.
 """
 time.sleep(1)
 data = generate(design_prompt)
+
+if not data or 'candidates' not in data:
+    print("❌ Build Failed. 2.5 ne dhoka diya hoga, par humne usse rok diya tha. Check Quota.")
+    sys.exit(1)
+
 html_code = data['candidates'][0]['content']['parts'][0]['text'].replace("```html", "").replace("```", "")
 html_filename = f"{new_product_idea.replace(' ', '_')}.html"
 with open(html_filename, "w") as f:
     f.write(html_code)
 
-# --- 4. SOCIAL MEDIA CONTENT (NO LINKEDIN) ---
+# --- 4. SOCIAL MEDIA CONTENT ---
 print(f"📢 Generating Viral Content...")
 marketing_prompt = f"""
 For product: "{new_product_idea}".
+1. Website Description.
+2. Twitter Thread.
+3. Instagram Caption.
+4. Facebook Post.
 
-1. Write a 1-sentence catchy description for the website.
-2. Write a Viral Twitter/X Thread (3 tweets, Hook -> Value -> Link).
-3. Write an Instagram Caption (Pain point based) with 15 hashtags.
-4. Write a Facebook Group Post (Community style: "Guys, I made this free tool...").
-
-Format output exactly like this:
+Format:
 WEBSITE_DESC: [text]
 TWITTER: [text]
 INSTAGRAM: [text]
@@ -151,7 +171,6 @@ if EMAIL_USER and EMAIL_PASS:
     BOSS, WEBSITE UPDATED!
     
     🌐 Your Site: https://RajatDatta5315.github.io/mad-scientist-factory/
-    (If domain connected: https://www.drypaperhq.com/)
     
     ----- SOCIAL MEDIA COPY PASTE -----
     {marketing_text}
