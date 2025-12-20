@@ -1,77 +1,48 @@
-
 import requests
 import json
-import os
 import re
 import sys
 import time
+import os
 
-print("--- 🏭 STARTING FACTORY (MACHINE GUN MODE) ---")
+print("--- 🏭 STARTING FACTORY (DIRECT KEY MODE) ---")
 
-if "API_KEY" not in os.environ:
-    print("❌ FATAL: API_KEY not found!")
+# 👇👇👇 YAHAN APNI KEY PASTE KAR (Double quotes ke andar) 👇👇👇
+API_KEY = "AIzaSyBttt7j1uFig01pysOf2gv9G2_URJufmvw"
+# 👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆
+
+if "YAHAN_APNI" in API_KEY:
+    print("❌ ABE! Key to paste kar line 11 pe!")
     sys.exit(1)
 
-API_KEY = os.environ["API_KEY"]
 INVENTORY_FILE = "inventory.txt"
 
-# --- STRATEGY: Try Every Combination ---
-# Google ke alag-alag versions aur model names
-VERSIONS = ["v1beta", "v1"]
-MODELS = [
-    "gemini-1.5-flash-latest", # Aksar ye chalta hai
-    "gemini-1.5-flash",        # Standard
-    "gemini-1.5-flash-002",    # New Stable
-    "gemini-1.5-flash-001",    # Old Stable
-    "gemini-1.5-pro",
-    "gemini-pro",
-    "gemini-2.0-flash-exp"     # Experimental
-]
-
-def try_generate(prompt, model, version):
-    url = f"https://generativelanguage.googleapis.com/{version}/models/{model}:generateContent?key={API_KEY}"
+# --- 1. CONNECT ---
+def generate(prompt):
+    # Hum seedha URL use kar rahe hain, library nahi. Ye kabhi fail nahi hota.
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
     headers = {'Content-Type': 'application/json'}
     payload = {"contents": [{"parts": [{"text": prompt}]}]}
     
     try:
-        response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=10)
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
         if response.status_code == 200:
             return response.json()
+        else:
+            print(f"⚠️ Google Error {response.status_code}: {response.text}")
+            return None
+    except Exception as e:
+        print(f"❌ Connection Error: {e}")
         return None
-    except:
-        return None
 
-# 1. FIND WORKING COMBO
-working_config = None
-print(f"🔍 Testing Connections...")
-
-found = False
-for ver in VERSIONS:
-    if found: break
-    for mod in MODELS:
-        print(f"👉 Trying: {mod} on {ver}...")
-        res = try_generate("Say Hi", mod, ver)
-        if res and 'candidates' in res:
-            working_config = (mod, ver)
-            print(f"✅ SUCCESS! Connected via: {mod} ({ver})")
-            found = True
-            break
-        time.sleep(0.5) # Thoda saans lene do
-
-if not working_config:
-    print("❌ FATAL: Sab fail ho gaya. API Key check karo ya Nayi Key banao.")
-    sys.exit(1)
-
-ACTIVE_MODEL, ACTIVE_VERSION = working_config
-
-# 2. MEMORY
+# --- 2. MEMORY ---
 current_inventory = []
 if os.path.exists(INVENTORY_FILE):
     with open(INVENTORY_FILE, "r") as f:
         current_inventory = [line.strip() for line in f.readlines() if line.strip()]
 
-# 3. RESEARCH
-print("🧠 Researching Market Gaps...")
+# --- 3. RESEARCH ---
+print("🧠 Researching...")
 research_prompt = f"""
 Act as a Product Researcher.
 Current Inventory: {current_inventory}.
@@ -81,41 +52,45 @@ Name format: Clean, Simple, Professional. No special chars.
 Return ONLY the Name.
 """
 
-data = try_generate(research_prompt, ACTIVE_MODEL, ACTIVE_VERSION)
+data = generate(research_prompt)
 if not data:
-    print("❌ Research Failed.")
+    print("❌ Research failed. Key check kar bhai.")
     sys.exit(1)
 
-new_product_idea = data['candidates'][0]['content']['parts'][0]['text'].strip()
-new_product_idea = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product_idea)
-print(f"💡 SELECTED PRODUCT: {new_product_idea}")
+try:
+    new_product_idea = data['candidates'][0]['content']['parts'][0]['text'].strip()
+    new_product_idea = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product_idea)
+    print(f"💡 IDEA: {new_product_idea}")
+except:
+    print("❌ Google ne response diya par format galat tha.")
+    sys.exit(1)
 
-# 4. BUILD
-print(f"🛠️ Building HTML...")
+# --- 4. BUILD ---
+print(f"🛠️ Building HTML for {new_product_idea}...")
 design_prompt = f"""
 Write HTML for "{new_product_idea}".
 Theme: #121212 Dark Mode.
-Feature: <span contenteditable="true"> for text.
-Feature: Print to PDF button.
+Feature: Editable content, Print to PDF.
 Return ONLY raw HTML.
 """
 
 time.sleep(1)
-data = try_generate(design_prompt, ACTIVE_MODEL, ACTIVE_VERSION)
+data = generate(design_prompt)
 
-if not data:
-    print("❌ Build Failed.")
+if data:
+    html_code = data['candidates'][0]['content']['parts'][0]['text']
+    html_code = html_code.replace("```html", "").replace("```", "")
+    
+    filename = f"{new_product_idea.replace(' ', '_')}.html"
+    
+    with open(filename, "w") as f:
+        f.write(html_code)
+
+    with open(INVENTORY_FILE, "a") as f:
+        f.write(f"\n{new_product_idea}")
+
+    print(f"\n✅ SUCCESS: Created {filename}")
+else:
+    print("❌ HTML Generation failed.")
     sys.exit(1)
 
-html_code = data['candidates'][0]['content']['parts'][0]['text']
-html_code = html_code.replace("```html", "").replace("```", "")
-
-filename = f"{new_product_idea.replace(' ', '_')}.html"
-
-with open(filename, "w") as f:
-    f.write(html_code)
-
-with open(INVENTORY_FILE, "a") as f:
-    f.write(f"\n{new_product_idea}")
-
-print(f"\n✅ SUCCESS: Created {filename}")
