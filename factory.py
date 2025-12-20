@@ -11,7 +11,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-print("--- 🏭 STARTING FACTORY (NO 2.5 ALLOWED) ---")
+print("--- 🏭 STARTING FACTORY (STRICT 1.5 MODE) ---")
 
 # 👇👇👇 PASTE KEY HERE 👇👇👇
 API_KEY = "AIzaSyBttt7j1uFig01pysOf2gv9G2_URJufmvw" 
@@ -24,10 +24,10 @@ if "YAHAN" in API_KEY:
 INVENTORY_FILE = "inventory.txt"
 WEBSITE_FILE = "index.html"
 
-# --- 1. CONNECT (WITH ANTI-2.5 FILTER) ---
-print("🔍 Scanning for Stable Brain...")
+# --- 1. CONNECT (STRICT 1.5 FILTER) ---
+print("🔍 Scanning for 1.5 Models Only...")
 list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}"
-WORKING_MODEL = "models/gemini-1.5-flash" # Fallback
+WORKING_MODEL = "models/gemini-1.5-flash" # Default Backup
 
 try:
     response = requests.get(list_url)
@@ -36,14 +36,19 @@ try:
         for m in data.get('models', []):
             name = m['name']
             
-            # 🚫 BOUNCER LOGIC: 2.5 ko skip karo
-            if "2.5" in name:
-                print(f"🚫 Skipping Unstable Model: {name}")
+            # 🚫 STRICT FILTER: Sirf 1.5 allow karo
+            if "1.5" not in name:
+                print(f"🚫 Skipping: {name} (Not 1.5)")
                 continue
-                
+            
+            # Experimental models ko bhi hatao
+            if "exp" in name:
+                 print(f"🚫 Skipping: {name} (Experimental)")
+                 continue
+
             if 'generateContent' in m.get('supportedGenerationMethods', []):
                 WORKING_MODEL = name
-                print(f"✅ Found Stable Model: {name}")
+                print(f"✅ FOUND GOLD: {name}")
                 break
 except:
     pass
@@ -76,9 +81,11 @@ Name format: Clean, Simple, Professional. No special chars.
 Return ONLY the Name.
 """
 data = generate(research_prompt)
+
+# Safety Check
 if not data or 'candidates' not in data:
-    print("❌ Research Failed (Google Refused). Retrying with backup...")
-    new_product_idea = "Agency_Client_Onboarding_Checklist"
+    print("❌ Google refused Research. Using Backup Idea.")
+    new_product_idea = "Agency_Social_Media_Policy_Template"
 else:
     new_product_idea = data['candidates'][0]['content']['parts'][0]['text'].strip()
     new_product_idea = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product_idea)
@@ -98,7 +105,7 @@ time.sleep(1)
 data = generate(design_prompt)
 
 if not data or 'candidates' not in data:
-    print("❌ Build Failed. 2.5 ne dhoka diya hoga, par humne usse rok diya tha. Check Quota.")
+    print("❌ Build Failed. Ab bhi issue hai to API Key limit check karo.")
     sys.exit(1)
 
 html_code = data['candidates'][0]['content']['parts'][0]['text'].replace("```html", "").replace("```", "")
