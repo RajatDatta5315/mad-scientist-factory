@@ -29,11 +29,13 @@ jobs:
         run: |
           python factory.py
 
+      
       - name: Force Save & Upload
         run: |
           git config --global user.name 'Mad Scientist Bot'
           git config --global user.email 'bot@noreply.github.com'
-          git add *.html inventory.txt
-          git commit -m "New Product Generated" || echo "Kuch naya nahi hai"
+          # PURANA: git add *.html inventory.txt
+          # NAYA (Sab kuch uthao):
+          git add .
+          git commit -m "New Product & Marketing Assets" || echo "Kuch naya nahi hai"
           git push -f origin main
-
