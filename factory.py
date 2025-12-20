@@ -5,10 +5,10 @@ import sys
 import time
 import os
 
-print("--- 🏭 STARTING FACTORY (UNIVERSAL SEARCH MODE) ---")
+print("--- 🏭 STARTING FACTORY (PRODUCT + MARKETING MODE) ---")
 
 # 👇👇👇 PASTE KEY HERE 👇👇👇
-API_KEY = "AIzaSyBttt7j1uFig01pysOf2gv9G2_URJufmvw"
+API_KEY = "AIzaSyBttt7j1uFig01pysOf2gv9G2_URJufmvw" 
 # 👆👆👆👆👆👆👆👆👆👆👆👆👆👆
 
 if "YAHAN" in API_KEY:
@@ -17,53 +17,25 @@ if "YAHAN" in API_KEY:
 
 INVENTORY_FILE = "inventory.txt"
 
-# --- STEP 1: ASK GOOGLE "WHAT DO YOU HAVE?" ---
-print("🔍 Scanning Google Server for ANY working model...")
-
-# Hum list mangenge
+# --- 1. CONNECT & FIND MODEL ---
+print("🔍 Scanning for Brain...")
+# (Wahi purana connection logic - Universal Search)
 list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}"
-WORKING_MODEL = None
-WORKING_VERSION = "v1beta"
+WORKING_MODEL = "models/gemini-1.5-flash" # Default fallback
 
 try:
     response = requests.get(list_url)
     if response.status_code == 200:
         data = response.json()
-        # List mein se dhundo kaunsa model text generate kar sakta hai
         if 'models' in data:
             for m in data['models']:
-                name = m['name'] # e.g. models/gemini-1.5-flash
-                methods = m.get('supportedGenerationMethods', [])
-                
-                if 'generateContent' in methods:
-                    # Test karo ki ye chalta hai ya nahi
-                    print(f"👉 Testing found model: {name}...")
-                    test_url = f"https://generativelanguage.googleapis.com/v1beta/{name}:generateContent?key={API_KEY}"
-                    headers = {'Content-Type': 'application/json'}
-                    payload = {"contents": [{"parts": [{"text": "Hi"}]}]}
-                    
-                    try:
-                        r = requests.post(test_url, headers=headers, data=json.dumps(payload))
-                        if r.status_code == 200:
-                            print(f"✅ BINGO! Locked on: {name}")
-                            WORKING_MODEL = name
-                            break # Mil gaya! Loop todo
-                        else:
-                            print(f"⚠️ {name} failed ({r.status_code}).")
-                    except:
-                        continue
-    else:
-        print(f"❌ List fetch failed: {response.status_code}")
+                if 'generateContent' in m.get('supportedGenerationMethods', []):
+                    WORKING_MODEL = m['name']
+                    break
+except:
+    pass
+print(f"✅ Connected to: {WORKING_MODEL}")
 
-except Exception as e:
-    print(f"❌ Connection Error: {e}")
-
-# Fallback (Agar list fail ho jaye to zabardasti ye try karo)
-if not WORKING_MODEL:
-    print("⚠️ Scanning failed. Forcing 'models/gemini-1.5-flash'...")
-    WORKING_MODEL = "models/gemini-1.5-flash"
-
-# --- STEP 2: GENERATE FUNCTION ---
 def generate(prompt):
     url = f"https://generativelanguage.googleapis.com/v1beta/{WORKING_MODEL}:generateContent?key={API_KEY}"
     headers = {'Content-Type': 'application/json'}
@@ -71,20 +43,16 @@ def generate(prompt):
     try:
         r = requests.post(url, headers=headers, data=json.dumps(payload))
         return r.json()
-    except Exception as e:
-        print(f"Request Error: {e}")
+    except:
         return None
 
-# --- STEP 3: EXECUTE ---
-
-# A. MEMORY
+# --- 2. RESEARCH ---
 current_inventory = []
 if os.path.exists(INVENTORY_FILE):
     with open(INVENTORY_FILE, "r") as f:
         current_inventory = [line.strip() for line in f.readlines() if line.strip()]
 
-# B. RESEARCH
-print(f"🧠 Researching using {WORKING_MODEL}...")
+print("🧠 Researching Product Idea...")
 research_prompt = f"""
 Act as a Product Researcher.
 Current Inventory: {current_inventory}.
@@ -93,42 +61,54 @@ Target: US Agencies.
 Name format: Clean, Simple, Professional. No special chars.
 Return ONLY the Name.
 """
-
 data = generate(research_prompt)
-if not data or 'candidates' not in data:
-    print(f"❌ Research failed. Response: {data}")
-    sys.exit(1)
-
 new_product_idea = data['candidates'][0]['content']['parts'][0]['text'].strip()
 new_product_idea = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product_idea)
 print(f"💡 IDEA: {new_product_idea}")
 
-# C. BUILD
+# --- 3. BUILD HTML ---
 print(f"🛠️ Building HTML...")
 design_prompt = f"""
 Write HTML for "{new_product_idea}".
 Theme: #121212 Dark Mode.
-Feature: Editable content, Print to PDF.
+Feature: Editable content, Print to PDF button.
 Return ONLY raw HTML.
 """
-
 time.sleep(1)
 data = generate(design_prompt)
+html_code = data['candidates'][0]['content']['parts'][0]['text'].replace("```html", "").replace("```", "")
+html_filename = f"{new_product_idea.replace(' ', '_')}.html"
+with open(html_filename, "w") as f:
+    f.write(html_code)
 
-if data and 'candidates' in data:
-    html_code = data['candidates'][0]['content']['parts'][0]['text']
-    html_code = html_code.replace("```html", "").replace("```", "")
-    
-    filename = f"{new_product_idea.replace(' ', '_')}.html"
-    
-    with open(filename, "w") as f:
-        f.write(html_code)
+# --- 4. GENERATE MARKETING ASSETS (Payhip Data) ---
+print(f"💰 Generating Marketing Assets...")
+marketing_prompt = f"""
+Act as a Copywriter & AI Art Director.
+Product: "{new_product_idea}" (A dark-mode HTML template for agencies).
 
-    with open(INVENTORY_FILE, "a") as f:
-        f.write(f"\n{new_product_idea}")
+Create the following for Payhip:
+1. SEO Optimized Title
+2. Persuasive Description (Pain point -> Agitation -> Solution)
+3. 10 High-Volume Tags (Comma separated)
+4. 3 AI Image Prompts to generate realistic mockups (Laptop on desk style).
 
-    print(f"\n✅ SUCCESS: Created {filename}")
-else:
-    print("❌ HTML Generation failed.")
-    sys.exit(1)
+Format the output clearly.
+"""
+time.sleep(1)
+data = generate(marketing_prompt)
+marketing_text = data['candidates'][0]['content']['parts'][0]['text']
+
+marketing_filename = f"{new_product_idea.replace(' ', '_')}_MARKETING.txt"
+with open(marketing_filename, "w") as f:
+    f.write(marketing_text)
+
+# Save Inventory
+with open(INVENTORY_FILE, "a") as f:
+    f.write(f"\n{new_product_idea}")
+
+print(f"\n✅ SUCCESS!")
+print(f"📁 Product: {html_filename}")
+print(f"📁 Marketing: {marketing_filename}")
+
 
