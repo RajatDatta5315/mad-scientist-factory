@@ -11,7 +11,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-print("--- 🏭 STARTING FACTORY (STRICT 1.5 MODE) ---")
+print("--- 🏭 STARTING FACTORY (DIRECT TARGET MODE) ---")
 
 # 👇👇👇 PASTE KEY HERE 👇👇👇
 API_KEY = "AIzaSyBttt7j1uFig01pysOf2gv9G2_URJufmvw" 
@@ -24,36 +24,41 @@ if "YAHAN" in API_KEY:
 INVENTORY_FILE = "inventory.txt"
 WEBSITE_FILE = "index.html"
 
-# --- 1. CONNECT (STRICT 1.5 FILTER) ---
-print("🔍 Scanning for 1.5 Models Only...")
-list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}"
-WORKING_MODEL = "models/gemini-1.5-flash" # Default Backup
+# --- 1. CONNECT (TARGET SPECIFIC MODELS) ---
+# Hum robotics ya preview models ko touch bhi nahi karenge.
+# Sirf ye 5 try karenge jo TEXT likhte hain.
+TARGET_MODELS = [
+    "models/gemini-1.5-flash",
+    "models/gemini-1.5-flash-latest",
+    "models/gemini-1.5-flash-001",
+    "models/gemini-1.5-pro",
+    "models/gemini-pro"
+]
 
-try:
-    response = requests.get(list_url)
-    if response.status_code == 200:
-        data = response.json()
-        for m in data.get('models', []):
-            name = m['name']
-            
-            # 🚫 STRICT FILTER: Sirf 1.5 allow karo
-            if "1.5" not in name:
-                print(f"🚫 Skipping: {name} (Not 1.5)")
-                continue
-            
-            # Experimental models ko bhi hatao
-            if "exp" in name:
-                 print(f"🚫 Skipping: {name} (Experimental)")
-                 continue
+WORKING_MODEL = None
+print("🔍 Testing Text Models...")
 
-            if 'generateContent' in m.get('supportedGenerationMethods', []):
-                WORKING_MODEL = name
-                print(f"✅ FOUND GOLD: {name}")
-                break
-except:
-    pass
+for model in TARGET_MODELS:
+    url = f"https://generativelanguage.googleapis.com/v1beta/{model}:generateContent?key={API_KEY}"
+    headers = {'Content-Type': 'application/json'}
+    payload = {"contents": [{"parts": [{"text": "Hi"}]}]}
+    
+    try:
+        print(f"👉 Testing {model}...")
+        r = requests.post(url, headers=headers, data=json.dumps(payload))
+        if r.status_code == 200:
+            print(f"✅ LOCKED ON: {model}")
+            WORKING_MODEL = model
+            break
+        else:
+            print(f"⚠️ Failed: {r.status_code}")
+    except:
+        print("⚠️ Connection Error")
+        continue
 
-print(f"🔒 Locked on: {WORKING_MODEL}")
+if not WORKING_MODEL:
+    print("❌ ALL TARGETS FAILED. API Key check kar ya Quota khatam ho gaya hai.")
+    sys.exit(1)
 
 def generate(prompt):
     url = f"https://generativelanguage.googleapis.com/v1beta/{WORKING_MODEL}:generateContent?key={API_KEY}"
@@ -82,9 +87,8 @@ Return ONLY the Name.
 """
 data = generate(research_prompt)
 
-# Safety Check
 if not data or 'candidates' not in data:
-    print("❌ Google refused Research. Using Backup Idea.")
+    print("❌ Research Failed. Using Backup.")
     new_product_idea = "Agency_Social_Media_Policy_Template"
 else:
     new_product_idea = data['candidates'][0]['content']['parts'][0]['text'].strip()
@@ -105,7 +109,7 @@ time.sleep(1)
 data = generate(design_prompt)
 
 if not data or 'candidates' not in data:
-    print("❌ Build Failed. Ab bhi issue hai to API Key limit check karo.")
+    print("❌ Build Failed.")
     sys.exit(1)
 
 html_code = data['candidates'][0]['content']['parts'][0]['text'].replace("```html", "").replace("```", "")
