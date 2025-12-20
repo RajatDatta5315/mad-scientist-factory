@@ -11,45 +11,80 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-print("--- 🏭 STARTING FACTORY (GEMINI 2.0 + SAFETY OFF) ---")
+print("--- 🏭 STARTING FACTORY (INFINITE AMMO MODE) ---")
 
-# 👇👇👇 PASTE KEY HERE 👇👇👇
-API_KEY = "AIzaSyBttt7j1uFig01pysOf2gv9G2_URJufmvw" 
-# 👆👆👆👆👆👆👆👆👆👆👆👆👆👆
+# 👇👇👇 YAHAN APNI SAARI KEYS DAAL (Comma laga ke) 👇👇👇
+API_KEYS = [
+    "AIzaSyCqUCRX3nEzLzBKHrm0lZB_EN6h4aUFGs4",
+    "AIzaSyDr2-hEXZRlRfoDGYlZ8J2J6k0zwsJXF5Y",
+    "AIzaSyBttt7j1uFig01pysOf2gv9G2_URJufmvw" 
+]
+# 👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆
 
-if "YAHAN" in API_KEY:
-    print("❌ ERROR: Key paste kar bhai!")
+# Remove placeholders
+VALID_KEYS = [k for k in API_KEYS if "KEY_NUMBER" not in k and "YAHAN" not in k]
+
+if not VALID_KEYS:
+    print("❌ ERROR: Ek bhi valid Key nahi mili list mein!")
     sys.exit(1)
 
+CURRENT_KEY_INDEX = 0
 INVENTORY_FILE = "inventory.txt"
 WEBSITE_FILE = "index.html"
 
-# --- 1. CONNECT (FORCE GEMINI 2.0) ---
-# 1.5 dead hai, to hum seedha 2.0 Exp use karenge jo tere account mein hai.
+# Model: Hum 2.0 Flash Exp use karenge (Safety Off) kyunki wahi connect hua tha last time
 WORKING_MODEL = "models/gemini-2.0-flash-exp"
-print(f"🔒 Locked on: {WORKING_MODEL}")
+
+def get_current_key():
+    return VALID_KEYS[CURRENT_KEY_INDEX]
+
+def switch_key():
+    global CURRENT_KEY_INDEX
+    if CURRENT_KEY_INDEX < len(VALID_KEYS) - 1:
+        CURRENT_KEY_INDEX += 1
+        print(f"🔄 Switching to API KEY #{CURRENT_KEY_INDEX + 1}...")
+        return True
+    else:
+        print("❌ SAB KEYS KHATAM HO GAYI! Ab koi option nahi bacha.")
+        return False
 
 def generate(prompt):
-    url = f"https://generativelanguage.googleapis.com/v1beta/{WORKING_MODEL}:generateContent?key={API_KEY}"
-    headers = {'Content-Type': 'application/json'}
-    
-    # 🔥 SAFETY OFF: Taki model "Build Failed" na kare
-    payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "safetySettings": [
-            { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
-            { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" },
-            { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" },
-            { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" }
-        ]
-    }
-    
-    try:
-        r = requests.post(url, headers=headers, data=json.dumps(payload))
-        return r.json()
-    except Exception as e:
-        print(f"⚠️ Request Error: {e}")
-        return None
+    while True:
+        api_key = get_current_key()
+        url = f"https://generativelanguage.googleapis.com/v1beta/{WORKING_MODEL}:generateContent?key={api_key}"
+        headers = {'Content-Type': 'application/json'}
+        
+        # 🔥 SAFETY OFF
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "safetySettings": [
+                { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
+                { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" },
+                { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" },
+                { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" }
+            ]
+        }
+        
+        try:
+            r = requests.post(url, headers=headers, data=json.dumps(payload))
+            
+            if r.status_code == 200:
+                return r.json()
+            
+            elif r.status_code == 429: # QUOTA FULL
+                print(f"⚠️ Key #{CURRENT_KEY_INDEX + 1} Quota Full!")
+                if switch_key():
+                    continue # Retry with new key
+                else:
+                    return None # Sab keys mar gayi
+            
+            else:
+                print(f"⚠️ Google Error {r.status_code}: {r.text}")
+                return None
+                
+        except Exception as e:
+            print(f"⚠️ Connection Error: {e}")
+            return None
 
 # --- 2. RESEARCH ---
 current_inventory = []
@@ -57,7 +92,7 @@ if os.path.exists(INVENTORY_FILE):
     with open(INVENTORY_FILE, "r") as f:
         current_inventory = [line.strip() for line in f.readlines() if line.strip()]
 
-print("🧠 Researching...")
+print(f"🧠 Researching using Key #{CURRENT_KEY_INDEX + 1}...")
 research_prompt = f"""
 Act as a Product Researcher.
 Current Inventory: {current_inventory}.
@@ -69,9 +104,9 @@ Return ONLY the Name.
 data = generate(research_prompt)
 
 if not data or 'candidates' not in data:
-    print(f"❌ Research Failed. Response: {data}")
-    # Fallback agar model fail ho
-    new_product_idea = "Agency_Performance_Review_Template"
+    print("❌ Research Failed. Sab keys try kar li.")
+    # Fallback
+    new_product_idea = "Agency_Sales_Script_Template"
 else:
     new_product_idea = data['candidates'][0]['content']['parts'][0]['text'].strip()
     new_product_idea = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product_idea)
@@ -87,11 +122,11 @@ Feature: Large 'DOWNLOAD AS PDF' button (window.print).
 Feature: Editable content.
 Return ONLY raw HTML.
 """
-time.sleep(2) # Thoda saans lene do model ko
+time.sleep(1)
 data = generate(design_prompt)
 
 if not data or 'candidates' not in data:
-    print(f"❌ Build Failed. Response: {data}")
+    print("❌ Build Failed.")
     sys.exit(1)
 
 html_code = data['candidates'][0]['content']['parts'][0]['text'].replace("```html", "").replace("```", "")
@@ -114,14 +149,18 @@ TWITTER: [text]
 INSTAGRAM: [text]
 FACEBOOK: [text]
 """
-time.sleep(2)
+time.sleep(1)
 data = generate(marketing_prompt)
-marketing_text = data['candidates'][0]['content']['parts'][0]['text']
 
-try:
-    web_desc = marketing_text.split("WEBSITE_DESC:")[1].split("TWITTER:")[0].strip()
-except:
-    web_desc = "A premium tool for agencies."
+marketing_text = "Check out this tool!"
+web_desc = "New Agency Tool"
+
+if data and 'candidates' in data:
+    marketing_text = data['candidates'][0]['content']['parts'][0]['text']
+    try:
+        web_desc = marketing_text.split("WEBSITE_DESC:")[1].split("TWITTER:")[0].strip()
+    except:
+        pass
 
 # --- 5. WEBSITE UPDATE ---
 print("🌐 Updating Website...")
@@ -161,7 +200,7 @@ if EMAIL_USER and EMAIL_PASS:
     msg['Subject'] = f"🚀 New Drop: {new_product_idea}"
     
     body = f"""
-    BOSS, WEBSITE UPDATED!
+    BOSS, INFINITE AMMO DEPLOYED!
     
     🌐 Your Site: https://RajatDatta5315.github.io/mad-scientist-factory/
     
