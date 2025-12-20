@@ -5,43 +5,72 @@ import sys
 import time
 import os
 
-print("--- 🏭 STARTING FACTORY (DIRECT KEY MODE) ---")
+print("--- 🏭 STARTING FACTORY (MULTI-MODEL HARDCODED) ---")
 
-# 👇👇👇 YAHAN APNI KEY PASTE KAR (Double quotes ke andar) 👇👇👇
+# 👇👇👇 PASTE YOUR KEY HERE 👇👇👇
 API_KEY = "AIzaSyBttt7j1uFig01pysOf2gv9G2_URJufmvw"
-# 👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆
+# 👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆
 
-if "YAHAN_APNI" in API_KEY:
-    print("❌ ABE! Key to paste kar line 11 pe!")
+if "YAHAN" in API_KEY:
+    print("❌ ERROR: Bhai Key paste karna bhul gaya code mein!")
     sys.exit(1)
 
 INVENTORY_FILE = "inventory.txt"
 
-# --- 1. CONNECT ---
-def generate(prompt):
-    # Hum seedha URL use kar rahe hain, library nahi. Ye kabhi fail nahi hota.
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+# --- STRATEGY: TRY ALL DOORS ---
+# Google ke alag alag model names
+POSSIBLE_MODELS = [
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-latest",
+    "gemini-pro",              # Sabse purana aur reliable
+    "gemini-1.5-pro-latest",
+    "gemini-1.0-pro"
+]
+
+WORKING_URL = None
+
+print("🔍 Finding a working Model...")
+
+for model in POSSIBLE_MODELS:
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={API_KEY}"
     headers = {'Content-Type': 'application/json'}
-    payload = {"contents": [{"parts": [{"text": prompt}]}]}
+    # Test Payload
+    payload = {"contents": [{"parts": [{"text": "Hi"}]}]}
     
     try:
+        print(f"👉 Testing {model}...")
         response = requests.post(url, headers=headers, data=json.dumps(payload))
+        
         if response.status_code == 200:
-            return response.json()
+            print(f"✅ BINGO! Connected to: {model}")
+            WORKING_URL = url
+            break
         else:
-            print(f"⚠️ Google Error {response.status_code}: {response.text}")
-            return None
-    except Exception as e:
-        print(f"❌ Connection Error: {e}")
+            print(f"⚠️ {model} Failed ({response.status_code})...")
+    except:
+        continue
+
+if not WORKING_URL:
+    print("❌ FATAL: Saare models fail ho gaye. Shayad Google API Issue hai.")
+    sys.exit(1)
+
+# --- FUNCTION TO GENERATE ---
+def generate(prompt):
+    headers = {'Content-Type': 'application/json'}
+    payload = {"contents": [{"parts": [{"text": prompt}]}]}
+    try:
+        r = requests.post(WORKING_URL, headers=headers, data=json.dumps(payload))
+        return r.json()
+    except:
         return None
 
-# --- 2. MEMORY ---
+# --- 1. MEMORY ---
 current_inventory = []
 if os.path.exists(INVENTORY_FILE):
     with open(INVENTORY_FILE, "r") as f:
         current_inventory = [line.strip() for line in f.readlines() if line.strip()]
 
-# --- 3. RESEARCH ---
+# --- 2. RESEARCH ---
 print("🧠 Researching...")
 research_prompt = f"""
 Act as a Product Researcher.
@@ -53,20 +82,16 @@ Return ONLY the Name.
 """
 
 data = generate(research_prompt)
-if not data:
-    print("❌ Research failed. Key check kar bhai.")
+if not data or 'candidates' not in data:
+    print("❌ Research failed.")
     sys.exit(1)
 
-try:
-    new_product_idea = data['candidates'][0]['content']['parts'][0]['text'].strip()
-    new_product_idea = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product_idea)
-    print(f"💡 IDEA: {new_product_idea}")
-except:
-    print("❌ Google ne response diya par format galat tha.")
-    sys.exit(1)
+new_product_idea = data['candidates'][0]['content']['parts'][0]['text'].strip()
+new_product_idea = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product_idea)
+print(f"💡 IDEA: {new_product_idea}")
 
-# --- 4. BUILD ---
-print(f"🛠️ Building HTML for {new_product_idea}...")
+# --- 3. BUILD ---
+print(f"🛠️ Building HTML...")
 design_prompt = f"""
 Write HTML for "{new_product_idea}".
 Theme: #121212 Dark Mode.
@@ -77,7 +102,7 @@ Return ONLY raw HTML.
 time.sleep(1)
 data = generate(design_prompt)
 
-if data:
+if data and 'candidates' in data:
     html_code = data['candidates'][0]['content']['parts'][0]['text']
     html_code = html_code.replace("```html", "").replace("```", "")
     
