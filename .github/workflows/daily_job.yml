@@ -16,30 +16,28 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up Python (Latest)
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'  # Naya Engine
+          python-version: '3.11'
 
-      - name: Install Requests
+      - name: Install Libraries
         run: |
           pip install requests
 
-            - name: Run Factory
-        env:  # <-- YE ADD KARNA HAI
+      - name: Run Factory
+        env:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           TARGET_EMAIL: ${{ secrets.TARGET_EMAIL }}
         run: |
           python factory.py
 
-      
       - name: Force Save & Upload
         run: |
           git config --global user.name 'Mad Scientist Bot'
           git config --global user.email 'bot@noreply.github.com'
-          # PURANA: git add *.html inventory.txt
-          # NAYA (Sab kuch uthao):
           git add .
-          git commit -m "New Product & Marketing Assets" || echo "Kuch naya nahi hai"
+          git commit -m "New Product & Email Sent" || echo "Kuch naya nahi hai"
           git push -f origin main
+
