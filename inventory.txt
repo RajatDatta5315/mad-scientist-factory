@@ -13,3 +13,4 @@ The Project Scope Blueprint
 
 Agency Proposal HTML Template
 Agency Master Service Agreement HTML Template
+Agency Statement of Work HTML Template
