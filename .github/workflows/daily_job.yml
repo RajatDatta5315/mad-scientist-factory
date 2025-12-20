@@ -3,7 +3,7 @@ name: Mad Scientist Daily Factory
 on:
   schedule:
     - cron: '30 5 * * *'
-  workflow_dispatch: # Manual Button
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,41 +13,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code (Deep History)
+      - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # Ye zaroori hai taaki 'rejected' error na aaye
 
-      - name: Set up Python
+      - name: Set up Python (Latest)
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.11'  # Naya Engine
 
-      - name: Install Libraries
+      - name: Install Requests
         run: |
-          pip install -r requirements.txt
+          pip install requests
 
       - name: Run Factory
-        env:
-          API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python factory.py
 
-      - name: Smart Save & Upload
+      - name: Force Save & Upload
         run: |
           git config --global user.name 'Mad Scientist Bot'
           git config --global user.email 'bot@noreply.github.com'
-          
-          # 1. Jo bhi file bani hai usse list mein dalo
           git add *.html inventory.txt
-          
-          # 2. Commit karo
           git commit -m "New Product Generated" || echo "Kuch naya nahi hai"
-          
-          # 3. Server se sync karo (Rebase - Sabse important line)
-          git pull --rebase origin main
-          
-          # 4. Ab pyar se upload karo
-          git push origin main
-
+          git push -f origin main
 
