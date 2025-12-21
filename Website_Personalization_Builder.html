@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Personalization Builder</title>
+    <style>
+        /* Dark Theme Styles */
+        body {
+            background-color: #2f2f2f;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #444;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .header {
+            background-color: #333;
+            padding: 10px;
+            border-bottom: 1px solid #555;
+        }
+        .header h1 {
+            margin: 0;
+            font-weight: bold;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            height: 40px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #666;
+            border-radius: 5px;
+        }
+        .form-group input[type="checkbox"] {
+            width: auto;
+            height: auto;
+            margin-right: 10px;
+        }
+        .btn {
+            background-color: #666;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Website Personalization Builder</h1>
+        </div>
+        <div class="main-content">
+            <div class="section">
+                <h2>General Settings</h2>
+                <div class="form-group">
+                    <label for="website-name">Website Name:</label>
+                    <input type="text" id="website-name" placeholder="Enter website name">
+                </div>
+                <div class="form-group">
+                    <label for="website-tagline">Website Tagline:</label>
+                    <input type="text" id="website-tagline" placeholder="Enter website tagline">
+                </div>
+            </div>
+            <div class="section">
+                <h2>Design Settings</h2>
+                <div class="form-group">
+                    <label for="primary-color">Primary Color:</label>
+                    <input type="color" id="primary-color" value="#007bff">
+                </div>
+                <div class="form-group">
+                    <label for="secondary-color">Secondary Color:</label>
+                    <input type="color" id="secondary-color" value="#6c757d">
+                </div>
+            </div>
+            <div class="section">
+                <h2>Layout Settings</h2>
+                <div class="form-group">
+                    <label for="layout-type">Layout Type:</label>
+                    <select id="layout-type">
+                        <option value="full-width">Full Width</option>
+                        <option value="boxed">Boxed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="sidebar-position">Sidebar Position:</label>
+                    <select id="sidebar-position">
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                    </select>
+                </div>
+            </div>
+            <div class="section">
+                <h2>Personalization Options</h2>
+                <div class="form-group">
+                    <label for="personalization-enabled">Enable Personalization:</label>
+                    <input type="checkbox" id="personalization-enabled">
+                </div>
+                <div class="form-group">
+                    <label for="personalization-type">Personalization Type:</label>
+                    <select id="personalization-type">
+                        <option value="user-based">User-Based</option>
+                        <option value="location-based">Location-Based</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn">Save Changes</button>
+        </div>
+    </div>
+</body>
+</html>
