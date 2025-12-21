@@ -11,44 +11,44 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-print("--- 🏭 FACTORY START: REAL AI IMAGES & CLEAN CODE ---")
+print("--- 🏭 FACTORY START: SECURE MODE ---")
 
-# 👇👇👇 DATA BHARO (KEY AUR EMAIL DAAL) 👇👇👇
-GROQ_API_KEY = "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" 
-PAYPAL_EMAIL = "Rajatdatta099@gmail.com"
-# 👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆
+# 👇 SECRETS SE DATA UTHAO 👇
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+PAYPAL_EMAIL = os.environ.get("PAYPAL_EMAIL")
+# 👆 NO HARDCODED KEYS 👆
 
-# 🛑 MAINE SAFETY CHECK HATA DIYA HAI. AB YE EXIT NAHI KAREGA. 🛑
+if not GROQ_API_KEY:
+    print("❌ ERROR: Secrets not found! Settings check kar.")
+    sys.exit(1)
 
 INVENTORY_FILE = "inventory.txt"
 WEBSITE_FILE = "index.html"
 
-# --- HELPER: CLEANER (BAKWAAS HATANE KE LIYE) ---
+# --- HELPER: CLEANER ---
 def clean_llm_response(text):
-    # Markdown symbols hatata hai
     text = text.replace("```html", "").replace("```css", "").replace("```", "")
-    # Sirf HTML dhoondhta hai
     match = re.search(r'<!DOCTYPE html>.*</html>', text, re.DOTALL | re.IGNORECASE)
-    if match:
-        return match.group(0)
+    if match: return match.group(0)
     return text
 
 def generate(prompt):
+    # ✅ URL FIX IS HERE (No Brackets)
     url = "[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     payload = {
         "model": "llama-3.3-70b-versatile",
-        "messages": [{"role": "system", "content": "You are an expert developer. Output ONLY raw code. Do not speak."}, {"role": "user", "content": prompt}]
+        "messages": [{"role": "system", "content": "You are an expert developer. Output ONLY raw code."}, {"role": "user", "content": prompt}]
     }
     try:
         r = requests.post(url, headers=headers, data=json.dumps(payload))
         if r.status_code == 200: return r.json()['choices'][0]['message']['content']
         else: print(f"⚠️ Groq Error: {r.text}")
-    except Exception as e: print(f"⚠️ Error: {e}")
+    except Exception as e: print(f"⚠️ Connection Error: {e}")
     return None
 
 # --- 1. RESEARCH ---
-print("🧠 Researching unique idea...")
+print("🧠 Researching...")
 current_inventory = []
 if os.path.exists(INVENTORY_FILE):
     with open(INVENTORY_FILE, "r") as f:
@@ -60,9 +60,7 @@ if os.path.exists(WEBSITE_FILE):
     with open(WEBSITE_FILE, "r") as f: existing_site_content = f.read()
 
 res = generate(f"Current list: {current_inventory}. Suggest 1 NEW High-Ticket Agency HTML Tool. Name only.")
-if not res: 
-    print("❌ Research failed.")
-    sys.exit(1)
+if not res: sys.exit(1)
 
 new_product = res.strip().replace('"', '').replace("'", "")
 clean_name = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product)
@@ -70,34 +68,31 @@ file_base = clean_name.replace(' ', '_')
 
 print(f"💡 Idea: {clean_name}")
 
-# STRICT DUPLICATE CHECK
 if clean_name in current_inventory or clean_name in existing_site_content:
-    print(f"⚠️ '{clean_name}' already exists. Skipping to prevent duplicates.")
+    print(f"⚠️ '{clean_name}' exists. Skipping.")
     sys.exit(0)
 
-# --- 2. BUILD TOOL (CLEAN) ---
+# --- 2. BUILD TOOL ---
 print("🛠️ Building Tool...")
-tool_raw = generate(f"Write HTML for '{clean_name}'. Dark Mode. Export PDF button. Editable content. RAW HTML only. No comments.")
+tool_raw = generate(f"Write HTML for '{clean_name}'. Dark Mode. Export PDF button. Editable content. RAW HTML only.")
 if tool_raw:
-    tool_clean = clean_llm_response(tool_raw)
-    with open(f"{file_base}_TOOL.html", "w") as f: f.write(tool_clean)
+    with open(f"{file_base}_TOOL.html", "w") as f: f.write(clean_llm_response(tool_raw))
 
-# --- 3. PRICING & REAL AI MOCKUP ---
+# --- 3. PRICING & REAL MOCKUP ---
 price = random.choice(["29", "49", "97"])
 paypal_url = f"[https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=](https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=){PAYPAL_EMAIL}&item_name={urllib.parse.quote(clean_name)}&amount={price}&currency_code=USD"
 
-# 🔥 POLLINATIONS AI (REAL IMAGE GENERATION) 🔥
-image_prompt = f"Product mockup of {clean_name}, dark background, neon green accent lighting, high tech, 3d isometric, 8k render, professional"
+# 🔥 POLLINATIONS AI (REAL IMAGE)
+image_prompt = f"Product mockup of {clean_name}, dark background, neon green accent lighting, high tech, 3d isometric, 8k render"
 encoded_prompt = urllib.parse.quote(image_prompt)
 mockup_url = f"[https://image.pollinations.ai/prompt/](https://image.pollinations.ai/prompt/){encoded_prompt}?width=600&height=400&nologo=true"
 
 print(f"✍️ Sales Page (${price})...")
-blog_raw = generate(f"Write Sales Page HTML for '{clean_name}'. Price ${price}. Buy Link '{paypal_url}'. Theme: Dark/Neon. Include CSS inside <style>. Output ONLY HTML.")
+blog_raw = generate(f"Write Sales Page HTML for '{clean_name}'. Price ${price}. Buy Link '{paypal_url}'. Theme: Dark/Neon. Output ONLY HTML.")
 if blog_raw:
-    blog_clean = clean_llm_response(blog_raw)
-    with open(f"{file_base}_BLOG.html", "w") as f: f.write(blog_clean)
+    with open(f"{file_base}_BLOG.html", "w") as f: f.write(clean_llm_response(blog_raw))
 
-# --- 4. GENERATE DESCRIPTION ---
+# --- 4. DESCRIPTION ---
 short_desc = generate(f"Write a 10-word description for '{clean_name}'. No quotes.")
 if short_desc: short_desc = short_desc.replace('"', '')
 
@@ -125,7 +120,7 @@ if "" in existing_site_content:
     with open(WEBSITE_FILE, "w") as f: f.write(new_content)
     print("✅ Store Updated!")
 else:
-    print("⚠️ 'AUTOMATION WILL INJECT PREMIUM CARDS HERE' tag not found in index.html!")
+    print("⚠️ Store update skipped (Tag missing)")
 
 with open(INVENTORY_FILE, "a") as f: f.write(f"\n{clean_name}")
 
