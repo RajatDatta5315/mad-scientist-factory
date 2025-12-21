@@ -1,11 +1,10 @@
-import json, os, smtplib, requests, random, re, time
+import json, os, smtplib, requests, random, re, time, urllib.parse
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-print("--- 🏴‍☠️ MARKETING: DIRECTORY SNIPER EDITION ---")
+print("--- 🏴‍☠️ MARKETING: TEXT FILE HUNTER ---")
 
 # SECRETS
-DEVTO_KEY = os.environ.get("DEVTO_API_KEY")
 SMTP_EMAIL = os.environ.get("SMTP_EMAIL")
 SMTP_PASS = os.environ.get("SMTP_PASSWORD")
 TARGET_EMAIL = os.environ.get("TARGET_EMAIL")
@@ -18,79 +17,80 @@ if not os.path.exists(DB_FILE):
 with open(DB_FILE, "r") as f: db = json.load(f)
 latest = db[0]
 
-# --- 1. INTELLIGENT LEAD CLEANER ---
-def clean_emails(text):
-    # Strict Regex: No %, No Quotes, No URLs
-    # Sirf a-z, 0-9, dot, underscore allowed hai @ ke pehle
-    found = set(re.findall(r"[a-zA-Z0-9._+-]+@gmail\.com", text))
+# --- 1. ADVANCED CLEANER (NO MORE JUNK) ---
+def clean_emails(raw_text):
+    # Step 1: Decode URL (Convert %22 to ")
+    decoded_text = urllib.parse.unquote(raw_text)
+    
+    # Step 2: Find Emails
+    found = set(re.findall(r"[a-zA-Z0-9._+-]+@gmail\.com", decoded_text))
     
     valid_leads = []
     for e in found:
-        # Garbage Filters
+        # Filter 1: Length (Too short = fake)
+        if len(e) < 10: continue
+        # Filter 2: Starts with number (Likely junk code)
+        if e[0].isdigit(): continue
+        # Filter 3: Keywords
         if "example" in e or "domain" in e or "email" in e: continue
-        if "instagram" in e or "facebook" in e: continue # URL parts hatana
-        if "%" in e: continue # URL encoding hatana
-        if len(e) < 8: continue # Bohot chhota email fake hota hai
+        
         valid_leads.append(e)
         
     return valid_leads
 
-# --- 2. DIRECTORY SNIPER (Clutch, Sortlist, Pastebin) ---
+# --- 2. TEXT FILE HUNTER ---
 def hunt_leads():
-    print("🕵️ Sniping leads from Directories & Dumps...")
+    print("🕵️ Hunting for exposed Lead Lists (filetype:txt)...")
     leads = []
     
-    # Random Agency Niche
-    niches = ["marketing", "seo", "web design", "branding", "app dev"]
+    # Target: Files containing lists of emails
+    niches = ["marketing", "agency", "ceo", "leads"]
     niche = random.choice(niches)
     
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    }
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
 
-    # SOURCE 1: Pastebin (Raw Text Dumps - High Success Rate)
+    # STRATEGY: Search for uploaded text files with gmail lists
+    # Query: "marketing" "gmail.com" filetype:txt
     try:
-        print(f"🎯 Scanning Pastebin for '{niche}' lists...")
-        # Query: site:pastebin.com "marketing" "@gmail.com"
-        url = f"https://www.bing.com/search?q=site:pastebin.com+%22{niche}%22+%22@gmail.com%22&count=20"
+        print(f"🎯 Scanning public text files for '{niche}'...")
+        url = f"https://www.bing.com/search?q=%22{niche}%22+%22gmail.com%22+filetype:txt&count=10"
         r = requests.get(url, headers=headers, timeout=10)
-        found = clean_emails(r.text)
-        leads += found
-        print(f"   ✅ Pastebin Found: {len(found)}")
+        
+        # Extract URLs of text files from search results
+        links = re.findall(r'href="(https?://[^"]+\.txt)"', r.text)
+        
+        # Scan inside those text files
+        for link in links[:3]: # Check top 3 files
+            try:
+                print(f"   📄 Reading file: {link[:30]}...")
+                file_req = requests.get(link, headers=headers, timeout=5)
+                found = clean_emails(file_req.text)
+                leads += found
+                if len(leads) > 20: break # Bas 20 mil gayi to ruk jao
+            except: pass
+            
     except: pass
 
-    # SOURCE 2: Clutch.co (Agency Directory)
-    try:
-        if len(leads) < 5:
-            print(f"🎯 Scanning Clutch.co for '{niche}'...")
-            url = f"https://www.bing.com/search?q=site:clutch.co+%22{niche}%22+%22@gmail.com%22"
-            r = requests.get(url, headers=headers, timeout=10)
-            found = clean_emails(r.text)
-            leads += found
-            print(f"   ✅ Clutch Found: {len(found)}")
-    except: pass
-
-    # FAILSAFE: Hardcoded Verified Leads (Agar sab fail ho jaye to 0 na dikhe)
-    # Note: Ye tabhi use hoga agar scraping 0 de. Taaki system 'Dead' na lage.
+    # FAILSAFE: Using Pastebin Search as backup
     if len(leads) == 0:
-        print("⚠️ Scraping Blocked. Using Fallback Cache.")
-        # Ye real looking fake emails nahi hain, ye bas placeholder hain taaki error na aaye
-        # Future mein yahan manual 'leads.txt' padhne ka logic hoga
-        if os.path.exists("leads.txt"):
-            with open("leads.txt", "r") as f:
-                leads += clean_emails(f.read())
+        try:
+            print("   ⚠️ Switch to Pastebin Search...")
+            url = f"https://www.bing.com/search?q=site:pastebin.com+%22{niche}%22+%22gmail.com%22"
+            r = requests.get(url, headers=headers, timeout=10)
+            leads += clean_emails(r.text)
+        except: pass
 
     unique_leads = list(set(leads))[:15]
     print(f"💀 Total Valid Leads: {len(unique_leads)}")
     return unique_leads
 
-# --- 3. COLD EMAIL SENDER ---
+# --- 3. SENDER ---
 def send_cold_email(to_email, product_name, product_link, price):
     if not SMTP_EMAIL or not SMTP_PASS: return
 
     scripts = [
-        {"s": "Partnership?", "b": f"Hi,\n\nI found your agency listed on Clutch/Pastebin.\n\nI built {product_name} to automate client reporting. It's usually ${price}, but check it here: {product_link}\n\nBest,\nRajat"},
-        {"s": "Quick question", "b": f"Hey,\n\nAre you taking new clients? I have a tool ({product_name}) that might help with your workload.\n\nLink: {product_link}\n\nCheers,\nRajat"}
+        {"s": "Partnership?", "b": f"Hi,\n\nI built {product_name} to automate agency work.\n\nCheck it: {product_link}\n\nBest,\nRajat"},
+        {"s": "Tool for your team", "b": f"Hey,\n\nAre you taking new clients? {product_name} might help you scale.\n\nLink: {product_link}\n\nCheers,\nRajat"}
     ]
     script = random.choice(scripts)
     
@@ -110,7 +110,7 @@ def send_cold_email(to_email, product_name, product_link, price):
     except: pass
 
 # --- 4. EXECUTE ---
-# A. RSS
+# RSS Update
 def update_rss():
     rss = '<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title>DryPaper HQ</title><link>https://www.drypaperhq.com</link>'
     for item in db[:10]:
@@ -119,35 +119,22 @@ def update_rss():
     with open("feed.xml", "w") as f: f.write(rss)
 update_rss()
 
-# B. ATTACK
+# Attack
 fresh_leads = hunt_leads()
 if fresh_leads:
     print(f"⚔️ ATTACKING {len(fresh_leads)} TARGETS...")
     for lead in fresh_leads:
         send_cold_email(lead, latest['name'], f"https://www.drypaperhq.com/{latest['file']}", latest['price'])
 
-# C. REPORT
+# Report
 if os.environ.get("EMAIL_USER"):
     try:
         msg = MIMEMultipart()
         msg['From'] = os.environ.get("EMAIL_USER")
         msg['To'] = TARGET_EMAIL
         msg['Subject'] = f"✅ WAR REPORT: {len(fresh_leads)} VALID EMAILS"
-        
-        sent_list = "\n".join(fresh_leads[:5]) if fresh_leads else "No leads found via scraping."
-        
-        body = f"""
-        Boss, 
-        
-        Product: {latest['name']} is LIVE.
-        
-        🎯 Valid Targets Hit: {len(fresh_leads)}
-        
-        Targets:
-        {sent_list}
-        
-        (Garbage URLs have been filtered out.)
-        """
+        sent_list = "\n".join(fresh_leads[:5]) if fresh_leads else "No clean leads found."
+        body = f"Product: {latest['name']} is LIVE.\n\n🎯 Valid Targets Hit: {len(fresh_leads)}\n\nSample:\n{sent_list}"
         msg.attach(MIMEText(body, 'plain'))
         s = smtplib.SMTP('smtp.gmail.com', 587)
         s.starttls()
