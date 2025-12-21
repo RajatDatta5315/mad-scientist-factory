@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account-Based Marketing Playbook Builder</title>
+    <style>
+        body {
+            background-color: #2f2f2f;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #444444;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .header {
+            background-color: #333333;
+            padding: 10px;
+            border-bottom: 1px solid #555555;
+        }
+        .header h1 {
+            margin: 0;
+            font-weight: bold;
+            font-size: 24px;
+        }
+        .playbook-builder {
+            padding: 20px;
+        }
+        .playbook-builder h2 {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .playbook-builder ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .playbook-builder li {
+            margin-bottom: 10px;
+        }
+        .playbook-builder li label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .playbook-builder li input, .playbook-builder li textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #555555;
+            border-radius: 5px;
+        }
+        .playbook-builder li input[type="submit"] {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .playbook-builder li input[type="submit"]:hover {
+            background-color: #0069d9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Account-Based Marketing Playbook Builder</h1>
+        </div>
+        <div class="playbook-builder">
+            <h2>Playbook Details</h2>
+            <ul>
+                <li>
+                    <label for="playbook-name">Playbook Name:</label>
+                    <input type="text" id="playbook-name" placeholder="Enter playbook name">
+                </li>
+                <li>
+                    <label for="target-account">Target Account:</label>
+                    <input type="text" id="target-account" placeholder="Enter target account">
+                </li>
+                <li>
+                    <label for="buyer-persona">Buyer Persona:</label>
+                    <textarea id="buyer-persona" placeholder="Enter buyer persona"></textarea>
+                </li>
+                <li>
+                    <label for="content-strategy">Content Strategy:</label>
+                    <textarea id="content-strategy" placeholder="Enter content strategy"></textarea>
+                </li>
+                <li>
+                    <label for="channels">Channels:</label>
+                    <input type="text" id="channels" placeholder="Enter channels">
+                </li>
+                <li>
+                    <label for="budget">Budget:</label>
+                    <input type="number" id="budget" placeholder="Enter budget">
+                </li>
+                <li>
+                    <input type="submit" value="Build Playbook">
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
