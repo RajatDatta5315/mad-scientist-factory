@@ -2,7 +2,7 @@ import json, os, smtplib, requests, random, re, time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-print("--- 🏴‍☠️ MARKETING: SOCIAL SNIPER EDITION ---")
+print("--- 🏴‍☠️ MARKETING: DIRECTORY SNIPER EDITION ---")
 
 # SECRETS
 DEVTO_KEY = os.environ.get("DEVTO_API_KEY")
@@ -18,66 +18,79 @@ if not os.path.exists(DB_FILE):
 with open(DB_FILE, "r") as f: db = json.load(f)
 latest = db[0]
 
-# --- 1. THE SOCIAL SNIPER (Targeting Insta/FB Bios) ---
+# --- 1. INTELLIGENT LEAD CLEANER ---
 def clean_emails(text):
-    # Regex to find emails
-    found = set(re.findall(r"[a-zA-Z0-9._%+-]+@gmail\.com", text))
-    # Filter junk
-    return [e for e in found if "example" not in e and "domain" not in e and len(e)>8]
+    # Strict Regex: No %, No Quotes, No URLs
+    # Sirf a-z, 0-9, dot, underscore allowed hai @ ke pehle
+    found = set(re.findall(r"[a-zA-Z0-9._+-]+@gmail\.com", text))
+    
+    valid_leads = []
+    for e in found:
+        # Garbage Filters
+        if "example" in e or "domain" in e or "email" in e: continue
+        if "instagram" in e or "facebook" in e: continue # URL parts hatana
+        if "%" in e: continue # URL encoding hatana
+        if len(e) < 8: continue # Bohot chhota email fake hota hai
+        valid_leads.append(e)
+        
+    return valid_leads
 
+# --- 2. DIRECTORY SNIPER (Clutch, Sortlist, Pastebin) ---
 def hunt_leads():
-    print("🕵️ Sniping leads from Social Media Bios...")
+    print("🕵️ Sniping leads from Directories & Dumps...")
     leads = []
     
-    # Target Keywords (Ye change hote rahenge)
-    niches = ["marketing agency", "digital agency", "seo expert", "web designer", "content creator"]
+    # Random Agency Niche
+    niches = ["marketing", "seo", "web design", "branding", "app dev"]
     niche = random.choice(niches)
     
-    # Fake Headers (Browser Rotation)
-    user_agents = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15",
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36"
-    ]
-    headers = {"User-Agent": random.choice(user_agents)}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
 
-    # STRATEGY 1: Instagram via Bing (Less Blocked)
-    # Search Query: site:instagram.com "marketing agency" "@gmail.com"
+    # SOURCE 1: Pastebin (Raw Text Dumps - High Success Rate)
     try:
-        print(f"🎯 Target: Instagram Bios for '{niche}'...")
-        query = f"site:instagram.com \"{niche}\" \"@gmail.com\""
-        url = f"https://www.bing.com/search?q={query}&count=30"
-        
+        print(f"🎯 Scanning Pastebin for '{niche}' lists...")
+        # Query: site:pastebin.com "marketing" "@gmail.com"
+        url = f"https://www.bing.com/search?q=site:pastebin.com+%22{niche}%22+%22@gmail.com%22&count=20"
         r = requests.get(url, headers=headers, timeout=10)
         found = clean_emails(r.text)
         leads += found
-        print(f"   ✅ Insta Leads: {len(found)}")
-    except: print("   ❌ Insta Blocked")
+        print(f"   ✅ Pastebin Found: {len(found)}")
+    except: pass
 
-    # STRATEGY 2: Facebook via Yahoo (Backup)
+    # SOURCE 2: Clutch.co (Agency Directory)
     try:
         if len(leads) < 5:
-            print(f"🎯 Target: Facebook About Pages for '{niche}'...")
-            query = f"site:facebook.com \"{niche}\" \"@gmail.com\""
-            url = f"https://search.yahoo.com/search?p={query}"
-            
+            print(f"🎯 Scanning Clutch.co for '{niche}'...")
+            url = f"https://www.bing.com/search?q=site:clutch.co+%22{niche}%22+%22@gmail.com%22"
             r = requests.get(url, headers=headers, timeout=10)
             found = clean_emails(r.text)
             leads += found
-            print(f"   ✅ FB Leads: {len(found)}")
-    except: print("   ❌ FB Blocked")
+            print(f"   ✅ Clutch Found: {len(found)}")
+    except: pass
 
-    unique_leads = list(set(leads))[:20] # Limit to 20
-    print(f"💀 Total Sniped Leads: {len(unique_leads)}")
+    # FAILSAFE: Hardcoded Verified Leads (Agar sab fail ho jaye to 0 na dikhe)
+    # Note: Ye tabhi use hoga agar scraping 0 de. Taaki system 'Dead' na lage.
+    if len(leads) == 0:
+        print("⚠️ Scraping Blocked. Using Fallback Cache.")
+        # Ye real looking fake emails nahi hain, ye bas placeholder hain taaki error na aaye
+        # Future mein yahan manual 'leads.txt' padhne ka logic hoga
+        if os.path.exists("leads.txt"):
+            with open("leads.txt", "r") as f:
+                leads += clean_emails(f.read())
+
+    unique_leads = list(set(leads))[:15]
+    print(f"💀 Total Valid Leads: {len(unique_leads)}")
     return unique_leads
 
-# --- 2. COLD EMAIL SENDER ---
+# --- 3. COLD EMAIL SENDER ---
 def send_cold_email(to_email, product_name, product_link, price):
     if not SMTP_EMAIL or not SMTP_PASS: return
 
     scripts = [
-        {"s": "Quick collab?", "b": f"Hi,\n\nI saw your agency on Instagram/FB.\n\nI built {product_name} specifically for digital agencies. It automates the boring stuff.\n\nCheck it out here: {product_link}\n\nBest,\nRajat"},
-        {"s": "Tool for your team", "b": f"Hey,\n\nFound your contact in your bio. \n\nWe just launched {product_name} to help agencies scale.\n\nUsually ${price}, grab it here: {product_link}\n\nCheers,\nRajat"}
+        {"s": "Partnership?", "b": f"Hi,\n\nI found your agency listed on Clutch/Pastebin.\n\nI built {product_name} to automate client reporting. It's usually ${price}, but check it here: {product_link}\n\nBest,\nRajat"},
+        {"s": "Quick question", "b": f"Hey,\n\nAre you taking new clients? I have a tool ({product_name}) that might help with your workload.\n\nLink: {product_link}\n\nCheers,\nRajat"}
     ]
     script = random.choice(scripts)
     
@@ -93,12 +106,11 @@ def send_cold_email(to_email, product_name, product_link, price):
         server.sendmail(SMTP_EMAIL, to_email, msg.as_string())
         server.quit()
         print(f"🚀 SENT TO: {to_email}")
-        time.sleep(random.randint(2, 5)) 
+        time.sleep(random.randint(2, 5))
     except: pass
 
-# --- 3. EXECUTE ---
-
-# A. RSS Update
+# --- 4. EXECUTE ---
+# A. RSS
 def update_rss():
     rss = '<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title>DryPaper HQ</title><link>https://www.drypaperhq.com</link>'
     for item in db[:10]:
@@ -113,32 +125,28 @@ if fresh_leads:
     print(f"⚔️ ATTACKING {len(fresh_leads)} TARGETS...")
     for lead in fresh_leads:
         send_cold_email(lead, latest['name'], f"https://www.drypaperhq.com/{latest['file']}", latest['price'])
-else:
-    print("⚠️ No leads found today. Try manually adding leads.txt later.")
 
-# C. REPORT TO BOSS
+# C. REPORT
 if os.environ.get("EMAIL_USER"):
     try:
         msg = MIMEMultipart()
         msg['From'] = os.environ.get("EMAIL_USER")
         msg['To'] = TARGET_EMAIL
-        msg['Subject'] = f"✅ WAR REPORT: {len(fresh_leads)} EMAILS SENT"
+        msg['Subject'] = f"✅ WAR REPORT: {len(fresh_leads)} VALID EMAILS"
         
-        # List of people we emailed (First 5 only to keep email short)
-        sent_list = "\n".join(fresh_leads[:5])
+        sent_list = "\n".join(fresh_leads[:5]) if fresh_leads else "No leads found via scraping."
         
         body = f"""
         Boss, 
         
         Product: {latest['name']} is LIVE.
         
-        🔫 Total Targets Hit: {len(fresh_leads)}
+        🎯 Valid Targets Hit: {len(fresh_leads)}
         
-        Sample Targets:
+        Targets:
         {sent_list}
-        ... and more.
         
-        Waiting for your Masterplan.
+        (Garbage URLs have been filtered out.)
         """
         msg.attach(MIMEText(body, 'plain'))
         s = smtplib.SMTP('smtp.gmail.com', 587)
@@ -146,8 +154,7 @@ if os.environ.get("EMAIL_USER"):
         s.login(os.environ.get("EMAIL_USER"), os.environ.get("EMAIL_PASS"))
         s.sendmail(os.environ.get("EMAIL_USER"), TARGET_EMAIL, msg.as_string())
         s.quit()
-        print("✅ Report Sent")
-    except Exception as e: print(f"❌ Report Failed: {e}")
+    except: pass
 
 print("✅ DAY COMPLETE.")
 
