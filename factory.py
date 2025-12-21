@@ -13,22 +13,21 @@ from email import encoders
 
 print("--- 🏭 FACTORY START: REAL AI IMAGES & CLEAN CODE ---")
 
-# 👇👇👇 DATA BHARO 👇👇👇
-GROQ_API_KEY = "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"
+# 👇👇👇 DATA BHARO (KEY AUR EMAIL DAAL) 👇👇👇
+GROQ_API_KEY = "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" 
 PAYPAL_EMAIL = "Rajatdatta099@gmail.com"
-# 👆👆👆👆👆👆👆👆👆👆👆
+# 👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆
 
-if "YAHAN" in GROQ_API_KEY:
-    sys.exit(1)
+# 🛑 MAINE SAFETY CHECK HATA DIYA HAI. AB YE EXIT NAHI KAREGA. 🛑
 
 INVENTORY_FILE = "inventory.txt"
 WEBSITE_FILE = "index.html"
 
-# --- HELPER: CLEANER ---
+# --- HELPER: CLEANER (BAKWAAS HATANE KE LIYE) ---
 def clean_llm_response(text):
-    # Remove Markdown
+    # Markdown symbols hatata hai
     text = text.replace("```html", "").replace("```css", "").replace("```", "")
-    # Find HTML content only
+    # Sirf HTML dhoondhta hai
     match = re.search(r'<!DOCTYPE html>.*</html>', text, re.DOTALL | re.IGNORECASE)
     if match:
         return match.group(0)
@@ -44,30 +43,36 @@ def generate(prompt):
     try:
         r = requests.post(url, headers=headers, data=json.dumps(payload))
         if r.status_code == 200: return r.json()['choices'][0]['message']['content']
-    except: pass
+        else: print(f"⚠️ Groq Error: {r.text}")
+    except Exception as e: print(f"⚠️ Error: {e}")
     return None
 
 # --- 1. RESEARCH ---
+print("🧠 Researching unique idea...")
 current_inventory = []
 if os.path.exists(INVENTORY_FILE):
     with open(INVENTORY_FILE, "r") as f:
         current_inventory = [line.strip() for line in f.readlines() if line.strip()]
 
-# Check Website Content
+# Website content check
 existing_site_content = ""
 if os.path.exists(WEBSITE_FILE):
     with open(WEBSITE_FILE, "r") as f: existing_site_content = f.read()
 
 res = generate(f"Current list: {current_inventory}. Suggest 1 NEW High-Ticket Agency HTML Tool. Name only.")
-if not res: sys.exit(1)
+if not res: 
+    print("❌ Research failed.")
+    sys.exit(1)
 
 new_product = res.strip().replace('"', '').replace("'", "")
 clean_name = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product)
 file_base = clean_name.replace(' ', '_')
 
+print(f"💡 Idea: {clean_name}")
+
 # STRICT DUPLICATE CHECK
 if clean_name in current_inventory or clean_name in existing_site_content:
-    print(f"⚠️ {clean_name} exists. Skipping.")
+    print(f"⚠️ '{clean_name}' already exists. Skipping to prevent duplicates.")
     sys.exit(0)
 
 # --- 2. BUILD TOOL (CLEAN) ---
@@ -118,6 +123,9 @@ card_html = f"""
 if "" in existing_site_content:
     new_content = existing_site_content.replace("", card_html)
     with open(WEBSITE_FILE, "w") as f: f.write(new_content)
+    print("✅ Store Updated!")
+else:
+    print("⚠️ 'AUTOMATION WILL INJECT PREMIUM CARDS HERE' tag not found in index.html!")
 
 with open(INVENTORY_FILE, "a") as f: f.write(f"\n{clean_name}")
 
@@ -145,6 +153,7 @@ if EMAIL_USER and EMAIL_PASS:
         s.login(EMAIL_USER, EMAIL_PASS)
         s.sendmail(EMAIL_USER, TARGET_EMAIL, msg.as_string())
         s.quit()
+        print("✅ Email Sent!")
     except: pass
 
 print("✅ DONE.")
