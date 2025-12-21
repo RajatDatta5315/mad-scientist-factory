@@ -11,9 +11,8 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-print("--- 🏭 FACTORY START: FINAL CLEANUP ---")
+print("--- 🏭 FACTORY START: SURGICAL MODE ---")
 
-# 👇 SECRETS
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 PAYPAL_EMAIL = os.environ.get("PAYPAL_EMAIL")
 
@@ -32,7 +31,6 @@ def clean_llm_response(text):
     return text
 
 def generate(prompt):
-    # ✅ CLEAN URL
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     payload = {
@@ -52,7 +50,7 @@ if os.path.exists(INVENTORY_FILE):
     with open(INVENTORY_FILE, "r") as f:
         current_inventory = [line.strip() for line in f.readlines() if line.strip()]
 
-# Check Website Content to avoid duplicates
+# Read Website Content
 existing_site_content = ""
 if os.path.exists(WEBSITE_FILE):
     with open(WEBSITE_FILE, "r") as f: existing_site_content = f.read()
@@ -67,7 +65,7 @@ file_base = clean_name.replace(' ', '_')
 print(f"💡 Idea: {clean_name}")
 
 if clean_name in current_inventory or clean_name in existing_site_content:
-    print(f"⚠️ '{clean_name}' already exists. Skipping.")
+    print(f"⚠️ '{clean_name}' exists. Skipping.")
     sys.exit(0)
 
 # --- 2. BUILD TOOL ---
@@ -76,14 +74,14 @@ tool_raw = generate(f"Write HTML for '{clean_name}'. Dark Mode. Export PDF butto
 if tool_raw:
     with open(f"{file_base}_TOOL.html", "w") as f: f.write(clean_llm_response(tool_raw))
 
-# --- 3. PRICING & TECH IMAGE ---
+# --- 3. PRICING & PROFESSIONAL IMAGE ---
 price = random.choice(["29", "49", "97"])
 paypal_url = f"[https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=](https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=){PAYPAL_EMAIL}&item_name={urllib.parse.quote(clean_name)}&amount={price}&currency_code=USD"
 
-# 🔥 NO FLOWERS: STRICT TECH PROMPT
-# Hum 'seed' use kar rahe hain taaki har baar alag image aaye
-seed = random.randint(1, 99999)
-mockup_url = f"[https://image.pollinations.ai/prompt/futuristic%20dark%20software%20dashboard%20ui%20interface%20neon%20green?width=800&height=500&nologo=true&seed=](https://image.pollinations.ai/prompt/futuristic%20dark%20software%20dashboard%20ui%20interface%20neon%20green?width=800&height=500&nologo=true&seed=){seed}"
+# 🔥 FIX: PROFESSIONAL TYPOGRAPHY MOCKUP (No Watermarks, No Flowers)
+# Uses Placehold.co to generate a clean dark box with the Product Name in Neon Green
+encoded_text = urllib.parse.quote(clean_name)
+mockup_url = f"[https://placehold.co/600x338/0f0f0f/00ff88.png?text=](https://placehold.co/600x338/0f0f0f/00ff88.png?text=){encoded_text}&font=montserrat"
 
 print(f"✍️ Sales Page (${price})...")
 blog_raw = generate(f"Write Sales Page HTML for '{clean_name}'. Price ${price}. Buy Link '{paypal_url}'. Theme: Dark/Neon. Output ONLY HTML.")
@@ -94,31 +92,36 @@ if blog_raw:
 short_desc = generate(f"Write a 10-word description for '{clean_name}'. No quotes.")
 if short_desc: short_desc = short_desc.replace('"', '')
 
-# --- 5. UPDATE STORE ---
-print("🌐 Updating Store...")
-card_html = f"""
-<div class="card">
-    <div class="mockup">
-        <img src="{mockup_url}" alt="{clean_name}">
-    </div>
-    <div class="content">
-        <div class="tag">FRESH DROP</div>
-        <div class="title">{clean_name}</div>
-        <div class="desc">{short_desc}</div>
-        <div class="footer">
-            <div class="price">${price}</div>
-            <a href="{file_base}_BLOG.html" class="btn">GET ACCESS</a>
+# --- 5. SURGICAL INJECTION (NO DUPLICATION) ---
+print("🌐 Updating Store safely...")
+
+# The new card HTML
+new_card = f"""
+    <div class="card">
+        <img src="{mockup_url}" alt="{clean_name}" class="card-img">
+        <div class="card-body">
+            <div class="tag">NEW ARRIVAL</div>
+            <div class="title">{clean_name}</div>
+            <div class="desc">{short_desc}</div>
+            <div class="footer">
+                <div class="price">${price}</div>
+                <a href="{file_base}_BLOG.html" class="btn">GET ACCESS</a>
+            </div>
         </div>
     </div>
-</div>
-"""
+    """
 
+# SPLIT AND STITCH METHOD
 if "" in existing_site_content:
-    new_content = existing_site_content.replace("", card_html)
-    with open(WEBSITE_FILE, "w") as f: f.write(new_content)
-    print("✅ Store Updated!")
+    parts = existing_site_content.split("")
+    # Part 0 is everything above, Part 1 is everything below
+    # We stitch: Part 0 + New Card + Marker + Part 1
+    final_content = parts[0] + new_card + parts[1]
+    
+    with open(WEBSITE_FILE, "w") as f: f.write(final_content)
+    print("✅ Store Updated Safely!")
 else:
-    print("⚠️ Store update skipped (Tag missing)")
+    print("⚠️ Marker not found. Skipping update.")
 
 with open(INVENTORY_FILE, "a") as f: f.write(f"\n{clean_name}")
 
