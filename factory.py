@@ -42,7 +42,7 @@ def generate(prompt):
     }
     try:
         # 👇👇👇 URL IS FIXED HERE 👇👇👇
-        r = requests.post("https://api.groq.com/openai/v1/chat/completions(https://api.groq.com/openai/v1/chat/completions)", headers=headers, data=json.dumps(payload))
+        r = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, data=json.dumps(payload))
         if r.status_code == 200: return r.json()['choices'][0]['message']['content']
         else: print(f"⚠️ Groq Error: {r.text}")
     except Exception as e: print(f"⚠️ Connection Error: {e}")
