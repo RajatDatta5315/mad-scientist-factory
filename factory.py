@@ -20,8 +20,8 @@ PAYPAL_EMAIL = os.environ.get("PAYPAL_EMAIL")
 
 if not GROQ_API_KEY:
     print("❌ ERROR: Secrets not found! GitHub Settings > Secrets check kar.")
-    # Local testing ke liye crash avoid karne ke liye
-    # sys.exit(1) 
+    # Local testing fallback
+    # sys.exit(1)
 
 INVENTORY_FILE = "inventory.txt"
 WEBSITE_FILE = "index.html"
@@ -34,16 +34,15 @@ def clean_llm_response(text):
     return text
 
 def generate(prompt):
-    # ✅ URL FIX (Bilkul Saaf URL)
-    url = "https://api.groq.com/openai/v1/chat/completions https://api.groq.com/openai/v1/chat/completions"
-    
+    # ✅ URL DIRECTLY INSIDE REQUEST (No variable to mess up)
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     payload = {
         "model": "llama-3.3-70b-versatile",
         "messages": [{"role": "system", "content": "You are an expert developer. Output ONLY raw code."}, {"role": "user", "content": prompt}]
     }
     try:
-        r = requests.post(url, headers=headers, data=json.dumps(payload))
+        # 👇👇👇 URL IS FIXED HERE 👇👇👇
+        r = requests.post("[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)", headers=headers, data=json.dumps(payload))
         if r.status_code == 200: return r.json()['choices'][0]['message']['content']
         else: print(f"⚠️ Groq Error: {r.text}")
     except Exception as e: print(f"⚠️ Connection Error: {e}")
