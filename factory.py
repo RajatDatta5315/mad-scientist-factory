@@ -35,7 +35,7 @@ def clean_llm_response(text):
 
 def generate(prompt):
     # ✅ URL FIX (Bilkul Saaf URL)
-    url = "[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)"
+    url = "https://api.groq.com/openai/v1/chat/completions https://api.groq.com/openai/v1/chat/completions"
     
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     payload = {
