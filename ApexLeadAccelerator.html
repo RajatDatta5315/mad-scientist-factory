@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApexLeadAccelerator</title>
+    <style>
+        /* Dark Theme */
+        body {
+            background-color: #2f2f2f;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #4f4f4f;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .header {
+            background-color: #6f6f6f;
+            padding: 10px;
+            border-bottom: 1px solid #fff;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .tools {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .tool {
+            margin: 20px;
+            padding: 20px;
+            background-color: #7f7f7f;
+            border-radius: 10px;
+            width: calc(33.33% - 20px);
+        }
+        .tool h2 {
+            margin-top: 0;
+        }
+        .tool button {
+            background-color: #9f9f9f;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .tool button:hover {
+            background-color: #bfbfbf;
+        }
+        .output {
+            padding: 20px;
+            background-color: #8f8f8f;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ApexLeadAccelerator</h1>
+        </div>
+        <div class="tools">
+            <div class="tool">
+                <h2>Tool 1: Lead Generator</h2>
+                <button id="lead-generator">Generate Lead</button>
+                <div class="output" id="lead-output"></div>
+            </div>
+            <div class="tool">
+                <h2>Tool 2: Email Validator</h2>
+                <input type="email" id="email-input" placeholder="Enter email">
+                <button id="email-validator">Validate Email</button>
+                <div class="output" id="email-output"></div>
+            </div>
+            <div class="tool">
+                <h2>Tool 3: Phone Number Formatter</h2>
+                <input type="tel" id="phone-input" placeholder="Enter phone number">
+                <button id="phone-formatter">Format Phone Number</button>
+                <div class="output" id="phone-output"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Lead Generator
+        document.getElementById('lead-generator').addEventListener('click', function() {
+            var lead = 'John Doe';
+            var output = document.getElementById('lead-output');
+            output.innerText = 'Generated Lead: ' + lead;
+        });
+        
+        // Email Validator
+        document.getElementById('email-validator').addEventListener('click', function() {
+            var email = document.getElementById('email-input').value;
+            var output = document.getElementById('email-output');
+            var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (emailRegex.test(email)) {
+                output.innerText = 'Email is valid';
+            } else {
+                output.innerText = 'Email is not valid';
+            }
+        });
+        
+        // Phone Number Formatter
+        document.getElementById('phone-formatter').addEventListener('click', function() {
+            var phone = document.getElementById('phone-input').value;
+            var output = document.getElementById('phone-output');
+            var phoneRegex = /^(\d{3})(\d{3})(\d{4})$/;
+            if (phoneRegex.test(phone)) {
+                output.innerText = 'Formatted Phone Number: (' + phone.substring(0, 3) + ') ' + phone.substring(3, 6) + '-' + phone.substring(6, 10);
+            } else {
+                output.innerText = 'Phone number is not valid';
+            }
+        });
+    </script>
+</body>
+</html>
