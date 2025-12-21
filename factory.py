@@ -11,10 +11,10 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-print("--- 🏭 STARTING FACTORY (GROQ POWERED ⚡) ---")
+print("--- 🏭 STARTING FACTORY (GROQ Llama 3.3 UPDATE) ---")
 
 # 👇👇👇 PASTE YOUR GROQ KEY HERE (gsk_...) 👇👇👇
-GROQ_API_KEY = "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"
+GROQ_API_KEY = "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"
 # 👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆
 
 if "YAHAN" in GROQ_API_KEY:
@@ -24,7 +24,7 @@ if "YAHAN" in GROQ_API_KEY:
 INVENTORY_FILE = "inventory.txt"
 WEBSITE_FILE = "index.html"
 
-# --- 1. CONNECT TO GROQ ---
+# --- 1. CONNECT TO GROQ (NEW MODEL) ---
 def generate(prompt):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
@@ -32,9 +32,9 @@ def generate(prompt):
         "Content-Type": "application/json"
     }
     
-    # Hum Llama 3 70B use karenge (Coding Beast)
+    # 🔥 UPDATED MODEL NAME: Llama 3.3 (Latest & Live)
     payload = {
-        "model": "llama3-70b-8192",
+        "model": "llama-3.3-70b-versatile",
         "messages": [
             {"role": "system", "content": "You are an expert developer and copywriter. Return ONLY the requested content. No yapping."},
             {"role": "user", "content": prompt}
@@ -59,7 +59,7 @@ if os.path.exists(INVENTORY_FILE):
     with open(INVENTORY_FILE, "r") as f:
         current_inventory = [line.strip() for line in f.readlines() if line.strip()]
 
-print("🧠 Researching with Llama 3...")
+print("🧠 Researching with Llama 3.3...")
 research_prompt = f"""
 Current Inventory: {current_inventory}.
 Find 1 High-Ticket B2B HTML Document missing from list.
@@ -88,7 +88,7 @@ Feature: Editable content areas (<span contenteditable>).
 Style: Professional, clean, modern agency look.
 Return ONLY raw HTML code. Do not start with "Here is the HTML".
 """
-time.sleep(1) # Groq is fast, but let's be safe
+time.sleep(1) 
 html_code = generate(design_prompt)
 
 if not html_code:
@@ -168,7 +168,7 @@ if EMAIL_USER and EMAIL_PASS:
     msg['Subject'] = f"⚡ GROQ DROP: {new_product_idea}"
     
     body = f"""
-    BOSS, NEW PRODUCT VIA GROQ (Llama 3)!
+    BOSS, NEW PRODUCT VIA GROQ (Llama 3.3)!
     
     🌐 Site: https://RajatDatta5315.github.io/mad-scientist-factory/
     
