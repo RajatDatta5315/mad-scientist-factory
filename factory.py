@@ -11,7 +11,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-print("--- 🏭 FACTORY START: PREMIUM MOCKUPS ---")
+print("--- 🏭 FACTORY START: REAL AI IMAGES & CLEAN CODE ---")
 
 # 👇👇👇 DATA BHARO 👇👇👇
 GROQ_API_KEY = "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"
@@ -24,13 +24,22 @@ if "YAHAN" in GROQ_API_KEY:
 INVENTORY_FILE = "inventory.txt"
 WEBSITE_FILE = "index.html"
 
-# --- HELPER ---
+# --- HELPER: CLEANER ---
+def clean_llm_response(text):
+    # Remove Markdown
+    text = text.replace("```html", "").replace("```css", "").replace("```", "")
+    # Find HTML content only
+    match = re.search(r'<!DOCTYPE html>.*</html>', text, re.DOTALL | re.IGNORECASE)
+    if match:
+        return match.group(0)
+    return text
+
 def generate(prompt):
-    url = "https://api.groq.com/openai/v1/chat/completions"
+    url = "[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     payload = {
         "model": "llama-3.3-70b-versatile",
-        "messages": [{"role": "system", "content": "Expert Developer."}, {"role": "user", "content": prompt}]
+        "messages": [{"role": "system", "content": "You are an expert developer. Output ONLY raw code. Do not speak."}, {"role": "user", "content": prompt}]
     }
     try:
         r = requests.post(url, headers=headers, data=json.dumps(payload))
@@ -44,7 +53,7 @@ if os.path.exists(INVENTORY_FILE):
     with open(INVENTORY_FILE, "r") as f:
         current_inventory = [line.strip() for line in f.readlines() if line.strip()]
 
-# Clean old duplicates from memory
+# Check Website Content
 existing_site_content = ""
 if os.path.exists(WEBSITE_FILE):
     with open(WEBSITE_FILE, "r") as f: existing_site_content = f.read()
@@ -61,38 +70,46 @@ if clean_name in current_inventory or clean_name in existing_site_content:
     print(f"⚠️ {clean_name} exists. Skipping.")
     sys.exit(0)
 
-# --- 2. BUILD TOOL ---
-tool_html = generate(f"Write HTML for '{clean_name}'. Dark Mode. Export PDF button. Editable content. RAW HTML only.")
-if tool_html:
-    with open(f"{file_base}_TOOL.html", "w") as f: f.write(tool_html.replace("```html", "").replace("```", ""))
+# --- 2. BUILD TOOL (CLEAN) ---
+print("🛠️ Building Tool...")
+tool_raw = generate(f"Write HTML for '{clean_name}'. Dark Mode. Export PDF button. Editable content. RAW HTML only. No comments.")
+if tool_raw:
+    tool_clean = clean_llm_response(tool_raw)
+    with open(f"{file_base}_TOOL.html", "w") as f: f.write(tool_clean)
 
-# --- 3. PRICING & MOCKUP ---
+# --- 3. PRICING & REAL AI MOCKUP ---
 price = random.choice(["29", "49", "97"])
-paypal_url = f"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business={PAYPAL_EMAIL}&item_name={urllib.parse.quote(clean_name)}&amount={price}&currency_code=USD"
+paypal_url = f"[https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=](https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=){PAYPAL_EMAIL}&item_name={urllib.parse.quote(clean_name)}&amount={price}&currency_code=USD"
 
-# 🔥 AUTO-MOCKUP GENERATOR (DARK NEON THEME) 🔥
-# Ye URL automatic image banayega
-mockup_url = f"https://placehold.co/600x400/111/00ff88/png?text={urllib.parse.quote(clean_name)}&font=montserrat"
+# 🔥 POLLINATIONS AI (REAL IMAGE GENERATION) 🔥
+image_prompt = f"Product mockup of {clean_name}, dark background, neon green accent lighting, high tech, 3d isometric, 8k render, professional"
+encoded_prompt = urllib.parse.quote(image_prompt)
+mockup_url = f"[https://image.pollinations.ai/prompt/](https://image.pollinations.ai/prompt/){encoded_prompt}?width=600&height=400&nologo=true"
 
 print(f"✍️ Sales Page (${price})...")
-blog_html = generate(f"Write Sales Page HTML for '{clean_name}'. Price ${price}. Buy Link '{paypal_url}'. RAW HTML.")
-if blog_html:
-    with open(f"{file_base}_BLOG.html", "w") as f: f.write(blog_html.replace("```html", "").replace("```", ""))
+blog_raw = generate(f"Write Sales Page HTML for '{clean_name}'. Price ${price}. Buy Link '{paypal_url}'. Theme: Dark/Neon. Include CSS inside <style>. Output ONLY HTML.")
+if blog_raw:
+    blog_clean = clean_llm_response(blog_raw)
+    with open(f"{file_base}_BLOG.html", "w") as f: f.write(blog_clean)
 
-# --- 4. UPDATE STORE ---
-print("🌐 Updating Store with Mockup...")
+# --- 4. GENERATE DESCRIPTION ---
+short_desc = generate(f"Write a 10-word description for '{clean_name}'. No quotes.")
+if short_desc: short_desc = short_desc.replace('"', '')
+
+# --- 5. UPDATE STORE ---
+print("🌐 Updating Store...")
 card_html = f"""
 <div class="card">
     <div class="mockup">
-        <img src="{mockup_url}" alt="{clean_name}">
+        <img src="{mockup_url}" alt="{clean_name}" loading="lazy">
     </div>
     <div class="content">
         <div class="tag">FRESH DROP</div>
         <div class="title">{clean_name}</div>
-        <div class="desc">Premium agency asset. Auto-generated.</div>
-        <div class="row">
+        <div class="desc">{short_desc}</div>
+        <div class="footer">
             <div class="price">${price}</div>
-            <a href="{file_base}_BLOG.html" class="btn">GET IT</a>
+            <a href="{file_base}_BLOG.html" class="btn">GET ACCESS</a>
         </div>
     </div>
 </div>
@@ -104,7 +121,7 @@ if "" in existing_site_content:
 
 with open(INVENTORY_FILE, "a") as f: f.write(f"\n{clean_name}")
 
-# --- 5. EMAIL ---
+# --- 6. EMAIL ---
 EMAIL_USER = os.environ.get("EMAIL_USER")
 EMAIL_PASS = os.environ.get("EMAIL_PASS")
 TARGET_EMAIL = os.environ.get("TARGET_EMAIL")
@@ -114,7 +131,7 @@ if EMAIL_USER and EMAIL_PASS:
     msg['From'] = EMAIL_USER
     msg['To'] = TARGET_EMAIL
     msg['Subject'] = f"💎 LIVE: {clean_name}"
-    body = f"Mockup: {mockup_url}\nPayPal: {paypal_url}\nSite: https://www.drypaperhq.com"
+    body = f"Mockup: {mockup_url}\nPayPal: {paypal_url}\nSite: [https://www.drypaperhq.com](https://www.drypaperhq.com)"
     msg.attach(MIMEText(body, 'plain'))
     if os.path.exists(f"{file_base}_TOOL.html"):
         att = MIMEBase('application', 'octet-stream')
@@ -131,3 +148,4 @@ if EMAIL_USER and EMAIL_PASS:
     except: pass
 
 print("✅ DONE.")
+
