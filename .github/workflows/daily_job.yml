@@ -1,45 +1,55 @@
-name: Mad Scientist Daily Factory
+name: Raja Empire Automation
 
 on:
   schedule:
     - cron: '30 5 * * *' # Roz subah run hoga
-  workflow_dispatch: # Manual run button
+  workflow_dispatch: # Button dabane ke liye
 
 permissions:
   contents: write
 
 jobs:
-  build:
+  run_empire:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
+      - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      - name: Install Libraries
-        run: |
-          pip install requests
+      - name: Install Tools
+        run: pip install requests
 
-      - name: Run Factory
-        env: 
+      # STEP 1: FACTORY (Product Banayega)
+      - name: 🏭 Run Factory
+        env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PAYPAL_EMAIL: ${{ secrets.PAYPAL_EMAIL }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python factory.py
+
+      # STEP 2: MARKETING (Leads layega + RSS banayega)
+      - name: 📢 Run Marketing
+        if: success() 
+        env:
+          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           TARGET_EMAIL: ${{ secrets.TARGET_EMAIL }}
-        run: |
-          python factory.py
+          SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: python marketing.py
 
-      - name: Force Save & Upload
+      # STEP 3: SAVE EVERYTHING
+      - name: 💾 Save Progress
+        if: always()
         run: |
-          git config --global user.name 'Mad Scientist Bot'
-          git config --global user.email 'bot@noreply.github.com'
+          git config --global user.name 'Empire Bot'
+          git config --global user.email 'bot@drypaperhq.com'
           git add .
-          git commit -m "New Premium Product Generated" || echo "No changes to commit"
+          git commit -m "Empire Operations Complete" || echo "No changes"
           git push
 
