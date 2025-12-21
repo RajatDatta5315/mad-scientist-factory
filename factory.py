@@ -11,7 +11,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-print("--- 🏭 FACTORY START: SURGICAL MODE ---")
+print("--- 🏭 FACTORY START: SURGICAL REPAIR ---")
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 PAYPAL_EMAIL = os.environ.get("PAYPAL_EMAIL")
@@ -23,7 +23,7 @@ if not GROQ_API_KEY:
 INVENTORY_FILE = "inventory.txt"
 WEBSITE_FILE = "index.html"
 
-# --- HELPER: CLEANER ---
+# --- HELPER ---
 def clean_llm_response(text):
     text = text.replace("```html", "").replace("```css", "").replace("```", "")
     match = re.search(r'<!DOCTYPE html>.*</html>', text, re.DOTALL | re.IGNORECASE)
@@ -50,7 +50,6 @@ if os.path.exists(INVENTORY_FILE):
     with open(INVENTORY_FILE, "r") as f:
         current_inventory = [line.strip() for line in f.readlines() if line.strip()]
 
-# Read Website Content
 existing_site_content = ""
 if os.path.exists(WEBSITE_FILE):
     with open(WEBSITE_FILE, "r") as f: existing_site_content = f.read()
@@ -68,18 +67,17 @@ if clean_name in current_inventory or clean_name in existing_site_content:
     print(f"⚠️ '{clean_name}' exists. Skipping.")
     sys.exit(0)
 
-# --- 2. BUILD TOOL ---
+# --- 2. BUILD ---
 print("🛠️ Building Tool...")
 tool_raw = generate(f"Write HTML for '{clean_name}'. Dark Mode. Export PDF button. Editable content. RAW HTML only.")
 if tool_raw:
     with open(f"{file_base}_TOOL.html", "w") as f: f.write(clean_llm_response(tool_raw))
 
-# --- 3. PRICING & PROFESSIONAL IMAGE ---
+# --- 3. ASSETS ---
 price = random.choice(["29", "49", "97"])
 paypal_url = f"[https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=](https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=){PAYPAL_EMAIL}&item_name={urllib.parse.quote(clean_name)}&amount={price}&currency_code=USD"
 
-# 🔥 FIX: PROFESSIONAL TYPOGRAPHY MOCKUP (No Watermarks, No Flowers)
-# Uses Placehold.co to generate a clean dark box with the Product Name in Neon Green
+# Clean Black & Neon Mockup (No Watermark)
 encoded_text = urllib.parse.quote(clean_name)
 mockup_url = f"[https://placehold.co/600x338/0f0f0f/00ff88.png?text=](https://placehold.co/600x338/0f0f0f/00ff88.png?text=){encoded_text}&font=montserrat"
 
@@ -88,14 +86,12 @@ blog_raw = generate(f"Write Sales Page HTML for '{clean_name}'. Price ${price}. 
 if blog_raw:
     with open(f"{file_base}_BLOG.html", "w") as f: f.write(clean_llm_response(blog_raw))
 
-# --- 4. DESCRIPTION ---
 short_desc = generate(f"Write a 10-word description for '{clean_name}'. No quotes.")
 if short_desc: short_desc = short_desc.replace('"', '')
 
-# --- 5. SURGICAL INJECTION (NO DUPLICATION) ---
-print("🌐 Updating Store safely...")
+# --- 4. INJECTION (REPLACE MODE - NO CRASH) ---
+print("🌐 Updating Store...")
 
-# The new card HTML
 new_card = f"""
     <div class="card">
         <img src="{mockup_url}" alt="{clean_name}" class="card-img">
@@ -111,21 +107,17 @@ new_card = f"""
     </div>
     """
 
-# SPLIT AND STITCH METHOD
+# ✅ LOGIC: REPLACE use kar rahe hain. Split ki zarurat nahi.
 if "" in existing_site_content:
-    parts = existing_site_content.split("")
-    # Part 0 is everything above, Part 1 is everything below
-    # We stitch: Part 0 + New Card + Marker + Part 1
-    final_content = parts[0] + new_card + parts[1]
-    
-    with open(WEBSITE_FILE, "w") as f: f.write(final_content)
+    new_content = existing_site_content.replace("", new_card)
+    with open(WEBSITE_FILE, "w") as f: f.write(new_content)
     print("✅ Store Updated Safely!")
 else:
-    print("⚠️ Marker not found. Skipping update.")
+    print("⚠️ Marker '' not found in index.html. Checking failed.")
 
 with open(INVENTORY_FILE, "a") as f: f.write(f"\n{clean_name}")
 
-# --- 6. EMAIL ---
+# --- 5. EMAIL ---
 EMAIL_USER = os.environ.get("EMAIL_USER")
 EMAIL_PASS = os.environ.get("EMAIL_PASS")
 TARGET_EMAIL = os.environ.get("TARGET_EMAIL")
