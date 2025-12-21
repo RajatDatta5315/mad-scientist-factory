@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DryPaper HQ | Elite Agency Tools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030303;
+            --card-bg: rgba(20, 20, 20, 0.6);
+            --accent: #00ff88; /* Neon Green */
+            --text: #ffffff;
+            --gray: #888888;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            font-family: 'Outfit', sans-serif; 
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #030303 70%);
+        }
+
+        /* HEADER */
+        header { 
+            padding: 80px 20px 40px; 
+            text-align: center; 
+        }
+        h1 { 
+            font-size: 3.5rem; 
+            font-weight: 700; 
+            letter-spacing: -1px;
+            background: linear-gradient(180deg, #fff 0%, #666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        p.sub { color: var(--gray); font-size: 1.1rem; }
+
+        /* GRID */
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            gap: 30px; 
+        }
+
+        /* PREMIUM GLASS CARD */
+        .card { 
+            background: var(--card-bg); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            border-radius: 16px; 
+            overflow: hidden; 
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.1); 
+            border-color: var(--accent);
+        }
+
+        /* MOCKUP AREA */
+        .mockup { 
+            height: 200px; 
+            background: linear-gradient(135deg, #111 0%, #222 100%); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            position: relative;
+        }
+        .mockup::after {
+            content: '📄'; /* Fallback Icon */
+            font-size: 4rem;
+            opacity: 0.5;
+        }
+        /* Overlay Gradient */
+        .mockup::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, transparent 80%, var(--card-bg));
+        }
+
+        .content { padding: 25px; }
+        .tag { 
+            font-size: 0.7rem; 
+            color: var(--accent); 
+            border: 1px solid rgba(0, 255, 136, 0.3); 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            display: inline-block; 
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .title { font-size: 1.4rem; font-weight: 600; margin-bottom: 8px; line-height: 1.2; }
+        .desc { color: var(--gray); font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px; }
+
+        .footer-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-top: auto; 
+            padding-top: 20px; 
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .price { font-size: 1.3rem; font-weight: 700; color: #fff; }
+        
+        .btn { 
+            background: #fff; 
+            color: #000; 
+            padding: 10px 24px; 
+            border-radius: 50px; 
+            font-weight: 600; 
+            text-decoration: none; 
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .btn:hover { background: var(--accent); box-shadow: 0 0 15px var(--accent); }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>DRYPAPER HQ</h1>
+    <p class="sub">Premium Assets for the Top 1% of Agencies.</p>
+</header>
+
+<div class="container">
+    <div class="grid">
+        </div>
+</div>
+
+</body>
+</html>
