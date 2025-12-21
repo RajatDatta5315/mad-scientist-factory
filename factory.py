@@ -9,6 +9,7 @@ WEBSITE_FILE = "index.html"
 
 if not GROQ_API_KEY:
     print("❌ Critical: GROQ Key Missing.")
+    # Local testing fallback
     sys.exit(1)
 
 # --- 1. IMAGE GENERATOR (Hugging Face) ---
@@ -37,11 +38,14 @@ def generate_text(prompt):
     except: pass
     return None
 
-# --- 3. MANAGER: LOAD DATABASE ---
+# --- 3. MANAGER: LOAD DATABASE (SYNTAX FIXED HERE) ---
 db = []
 if os.path.exists(DB_FILE):
-    try: with open(DB_FILE, "r") as f: db = json.load(f)
-    except: db = []
+    try:
+        with open(DB_FILE, "r") as f:
+            db = json.load(f)
+    except:
+        db = []
 
 # --- 4. FACTORY: CREATE PRODUCT ---
 existing = [p['name'] for p in db]
@@ -59,6 +63,7 @@ tool_html = tool_raw.replace("```html", "").replace("```", "")
 if "<!DOCTYPE" in tool_html: tool_html = tool_html[tool_html.find("<!DOCTYPE"):]
 if "</html>" in tool_html: tool_html = tool_html[:tool_html.find("</html>")+7]
 
+# File Name Sanitizer
 safe_name = re.sub(r'[^a-zA-Z0-9_]', '', new_name.replace(' ', '_')) + ".html"
 with open(safe_name, "w") as f: f.write(tool_html)
 
@@ -78,5 +83,5 @@ for item in db:
 html += "</div></body></html>"
 with open(WEBSITE_FILE, "w") as f: f.write(html)
 
-print("✅ Production & Maintenance Complete.")
+print("✅ Factory Done.")
 
