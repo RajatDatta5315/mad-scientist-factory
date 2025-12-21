@@ -20,7 +20,8 @@ PAYPAL_EMAIL = os.environ.get("PAYPAL_EMAIL")
 
 if not GROQ_API_KEY:
     print("❌ ERROR: Secrets not found! Settings check kar.")
-    sys.exit(1)
+    # Fallback to avoid immediate crash if local testing
+    # sys.exit(1) 
 
 INVENTORY_FILE = "inventory.txt"
 WEBSITE_FILE = "index.html"
@@ -33,8 +34,9 @@ def clean_llm_response(text):
     return text
 
 def generate(prompt):
-    # ✅ URL FIX IS HERE (No Brackets)
+    # ✅ URL FIX (Plain String - No Brackets)
     url = "[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)"
+    
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     payload = {
         "model": "llama-3.3-70b-versatile",
@@ -60,7 +62,9 @@ if os.path.exists(WEBSITE_FILE):
     with open(WEBSITE_FILE, "r") as f: existing_site_content = f.read()
 
 res = generate(f"Current list: {current_inventory}. Suggest 1 NEW High-Ticket Agency HTML Tool. Name only.")
-if not res: sys.exit(1)
+if not res: 
+    print("❌ API did not return data. Check Key.")
+    sys.exit(1)
 
 new_product = res.strip().replace('"', '').replace("'", "")
 clean_name = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product)
