@@ -2,23 +2,21 @@ import requests
 import json
 import re
 import sys
-import time
 import os
-import datetime
+import random
+import urllib.parse
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
-import random
-import urllib.parse
 
-print("--- 🏭 STARTING FACTORY (PREMIUM STORE + PAYPAL) ---")
+print("--- 🏭 FACTORY START: PREMIUM & CLEAN MODE ---")
 
-# 👇👇👇 CONFIGURATION (YAHAN DATA BHARO) 👇👇👇
+# 👇👇👇 CONFIGURATION 👇👇👇
 GROQ_API_KEY = "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"
-PAYPAL_EMAIL = "Rajatdatta099@gmail.com" # <--- YAHAN APNA EMAIL DAAL
-# 👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆
+PAYPAL_EMAIL = "Rajatdatta099@gmail.com " # <-- PayPal Email
+# 👆👆👆👆👆👆👆👆👆👆👆👆👆
 
 if "YAHAN" in GROQ_API_KEY:
     print("❌ ERROR: Key missing!")
@@ -33,7 +31,7 @@ def generate(prompt):
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     payload = {
         "model": "llama-3.3-70b-versatile",
-        "messages": [{"role": "system", "content": "You are a senior product developer and copywriter."}, {"role": "user", "content": prompt}],
+        "messages": [{"role": "system", "content": "You are an elite UX copywriter and developer."}, {"role": "user", "content": prompt}],
         "temperature": 0.7
     }
     try:
@@ -42,53 +40,50 @@ def generate(prompt):
     except: pass
     return None
 
-# --- 1. RESEARCH (NO DUPLICATES) ---
+# --- 1. SMART RESEARCH (NO DUPLICATES) ---
 current_inventory = []
 if os.path.exists(INVENTORY_FILE):
     with open(INVENTORY_FILE, "r") as f:
         current_inventory = [line.strip() for line in f.readlines() if line.strip()]
 
-print("🧠 Researching unique ideas...")
-res = generate(f"Current list: {current_inventory}. Suggest 1 NEW High-Ticket Agency HTML Tool. Name only. No chars.")
+# Check Website Content to avoid visual duplicates
+existing_site_content = ""
+if os.path.exists(WEBSITE_FILE):
+    with open(WEBSITE_FILE, "r") as f: existing_site_content = f.read()
+
+print("🧠 Researching unique high-ticket idea...")
+res = generate(f"Current list: {current_inventory}. Suggest 1 NEW High-Ticket Agency HTML Tool/Contract. Name only. No special chars.")
 if not res: sys.exit(1)
 
 new_product = res.strip().replace('"', '').replace("'", "")
 clean_name = re.sub(r'[^a-zA-Z0-9_ ]', '', new_product)
 file_base = clean_name.replace(' ', '_')
 
-if clean_name in current_inventory:
-    print("⚠️ Duplicate detected. Skipping.")
+# STRICT DUPLICATE CHECK
+if clean_name in current_inventory or clean_name in existing_site_content:
+    print(f"⚠️ '{clean_name}' already exists. Skipping to keep store clean.")
     sys.exit(0)
 
 print(f"💡 Green Light: {clean_name}")
 
-# --- 2. BUILD TOOL (THE PRODUCT) ---
+# --- 2. BUILD TOOL (PREMIUM) ---
 print("🛠️ Building Tool...")
-tool_html = generate(f"Write professional HTML/CSS/JS for '{clean_name}'. Dark Mode (#111). Feature: 'Export PDF' button. Editable fields. Return RAW HTML.")
+tool_html = generate(f"Write professional HTML/CSS/JS for '{clean_name}'. Theme: Dark/Neon. Feature: 'Export PDF' button. Editable contenteditable areas. Return RAW HTML only.")
 if tool_html:
     tool_html = tool_html.replace("```html", "").replace("```", "")
     with open(f"{file_base}_TOOL.html", "w") as f: f.write(tool_html)
 
-# --- 3. PRICING & PAYPAL LINK ---
-price = random.choice(["29", "39", "49", "97"])
-print(f"💰 Price Set: ${price}")
-
-# PayPal Link Generator
+# --- 3. PRICING & SALES PAGE ---
+price = random.choice(["29", "49", "97"])
 paypal_url = f"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business={PAYPAL_EMAIL}&item_name={urllib.parse.quote(clean_name)}&amount={price}&currency_code=USD"
 
-# --- 4. GENERATE BLOG / SALES PAGE ---
-print("✍️ Writing Sales Blog...")
+print(f"✍️ Writing Sales Page (${price})...")
 blog_prompt = f"""
-Write a SEO-Optimized Sales Page (HTML) for '{clean_name}'.
+Write a Premium Sales Page (HTML) for '{clean_name}'.
 Price: ${price}.
-IMPORTANT: The 'BUY NOW' button must link to: "{paypal_url}"
-Structure:
-1. Catchy Headline.
-2. Problem (Agitation).
-3. Solution (The Tool).
-4. Features List.
-5. "Buy Now" button (Styled Neon Green).
-Theme: Dark Mode (#050505), Neon accents.
+Buy Link: "{paypal_url}"
+Style: Dark mode, Apple-style typography.
+Include: Headline, Pain Points, Solution, Features, FAQ.
 Return RAW HTML.
 """
 blog_html = generate(blog_prompt)
@@ -96,38 +91,37 @@ if blog_html:
     blog_html = blog_html.replace("```html", "").replace("```", "")
     with open(f"{file_base}_BLOG.html", "w") as f: f.write(blog_html)
 
-# --- 5. UPDATE STOREFRONT (PREMIUM UI) ---
+# --- 4. GENERATE CARD DESCRIPTION ---
+short_desc = generate(f"Write a 1-sentence punchy description for '{clean_name}' (max 10 words).")
+short_desc = short_desc.replace('"', '')
+
+# --- 5. UPDATE STOREFRONT (PREMIUM CARD) ---
 print("🌐 Updating Storefront...")
-if os.path.exists(WEBSITE_FILE):
-    with open(WEBSITE_FILE, "r") as f: content = f.read()
-    
-    if clean_name in content:
-        print("⚠️ Entry exists. Skipping.")
-    else:
-        card_html = f"""
-        <div class="card">
-            <div class="card-img-placeholder">📄</div>
-            <div class="card-body">
-                <div class="tag">NEW DROP</div>
-                <div class="title">{clean_name}</div>
-                <div class="desc">Automated solution for modern agencies.</div>
-                <div class="price-row">
-                    <div class="price">${price}</div>
-                    <a href="{file_base}_BLOG.html" class="btn">VIEW & BUY</a>
-                </div>
-            </div>
+card_html = f"""
+<div class="card">
+    <div class="mockup" style="background: linear-gradient({random.randint(0,360)}deg, #111 0%, #222 100%);">
         </div>
-        """
-        
-        if "" in content:
-            new_content = content.replace("", card_html)
-            with open(WEBSITE_FILE, "w") as f: f.write(new_content)
-            print("✅ Store Updated!")
+    <div class="content">
+        <div class="tag">NEW ARRIVAL</div>
+        <div class="title">{clean_name}</div>
+        <div class="desc">{short_desc}</div>
+        <div class="footer-row">
+            <div class="price">${price}</div>
+            <a href="{file_base}_BLOG.html" class="btn">View Details</a>
+        </div>
+    </div>
+</div>
+"""
+
+if "" in existing_site_content:
+    new_content = existing_site_content.replace("", card_html)
+    with open(WEBSITE_FILE, "w") as f: f.write(new_content)
+    print("✅ Store Updated!")
 
 # Update Inventory
 with open(INVENTORY_FILE, "a") as f: f.write(f"\n{clean_name}")
 
-# --- 6. EMAIL NOTIFICATION ---
+# --- 6. EMAIL ---
 EMAIL_USER = os.environ.get("EMAIL_USER")
 EMAIL_PASS = os.environ.get("EMAIL_PASS")
 TARGET_EMAIL = os.environ.get("TARGET_EMAIL")
@@ -136,34 +130,22 @@ if EMAIL_USER and EMAIL_PASS:
     msg = MIMEMultipart()
     msg['From'] = EMAIL_USER
     msg['To'] = TARGET_EMAIL
-    msg['Subject'] = f"💎 READY TO SELL: {clean_name} (${price})"
-    body = f"""
-    BOSS, PRODUCT IS LIVE & LINKED TO PAYPAL!
-    
-    💰 Price: ${price}
-    🔗 PayPal Link Generated: {paypal_url}
-    🌐 Store: https://www.drypaperhq.com/
-    
-    Product attached below.
-    """
+    msg['Subject'] = f"💎 LIVE: {clean_name} (${price})"
+    body = f"Product is LIVE.\nPrice: ${price}\nPayPal: {paypal_url}\nSite: https://www.drypaperhq.com"
     msg.attach(MIMEText(body, 'plain'))
-    
-    # Attach Tool
     if os.path.exists(f"{file_base}_TOOL.html"):
         att = MIMEBase('application', 'octet-stream')
         with open(f"{file_base}_TOOL.html", "rb") as f: att.set_payload(f.read())
         encoders.encode_base64(att)
         att.add_header('Content-Disposition', f"attachment; filename={file_base}_TOOL.html")
         msg.attach(att)
-    
     try:
         s = smtplib.SMTP('smtp.gmail.com', 587)
         s.starttls()
         s.login(EMAIL_USER, EMAIL_PASS)
         s.sendmail(EMAIL_USER, TARGET_EMAIL, msg.as_string())
         s.quit()
-        print("✅ Email Sent!")
-    except: print("❌ Email Fail")
+    except: pass
 
 print("✅ DONE.")
 
