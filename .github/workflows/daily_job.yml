@@ -2,8 +2,8 @@ name: Raja Empire Automation
 
 on:
   schedule:
-    - cron: '30 5 * * *' # Roz subah run hoga
-  workflow_dispatch: # Button dabane ke liye
+    - cron: '30 5 * * *' # Roz subah 5:30
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -23,7 +23,7 @@ jobs:
       - name: Install Tools
         run: pip install requests
 
-      # STEP 1: FACTORY (Product Banayega)
+      # STEP 1: FACTORY (Asli Functional Tools Banayega)
       - name: 🏭 Run Factory
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -31,7 +31,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python factory.py
 
-      # STEP 2: MARKETING (Leads layega + RSS banayega)
+      # STEP 2: MARKETING (Github Leads - AB TOKEN KE SAATH)
       - name: 📢 Run Marketing
         if: success() 
         env:
@@ -41,6 +41,7 @@ jobs:
           TARGET_EMAIL: ${{ secrets.TARGET_EMAIL }}
           SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # <--- YE HAI ASLI MAGIC KEY
         run: python marketing.py
 
       # STEP 3: SAVE EVERYTHING
