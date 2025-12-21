@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Sales Pipeline Optimizer</title>
+    <style>
+        body {
+            background-color: #2f2f2f;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #4f4f4f;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .header {
+            background-color: #6f6f6f;
+            padding: 10px;
+            border-bottom: 1px solid #7f7f7f;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .form {
+            padding: 20px;
+        }
+        .form label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .form input, .form select {
+            width: 100%;
+            height: 30px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #7f7f7f;
+            border-radius: 5px;
+        }
+        .form button {
+            width: 100%;
+            height: 40px;
+            background-color: #8f8f8f;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form button:hover {
+            background-color: #9f9f9f;
+        }
+        .result {
+            padding: 20px;
+            border-top: 1px solid #7f7f7f;
+        }
+        .result h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI Sales Pipeline Optimizer</h1>
+        </div>
+        <div class="form">
+            <label for="deal-size">Deal Size:</label>
+            <input type="number" id="deal-size" value="10000">
+            <label for="conversion-rate">Conversion Rate (%):</label>
+            <input type="number" id="conversion-rate" value="20">
+            <label for="sales-cycle">Sales Cycle (days):</label>
+            <input type="number" id="sales-cycle" value="30">
+            <label for="lead-source">Lead Source:</label>
+            <select id="lead-source">
+                <option value="organic">Organic</option>
+                <option value="paid">Paid</option>
+                <option value="referral">Referral</option>
+            </select>
+            <button id="calculate">Calculate</button>
+        </div>
+        <div class="result">
+            <h2>Optimized Sales Pipeline:</h2>
+            <p id="result"></p>
+        </div>
+    </div>
+    <script>
+        const calculateButton = document.getElementById('calculate');
+        const dealSizeInput = document.getElementById('deal-size');
+        const conversionRateInput = document.getElementById('conversion-rate');
+        const salesCycleInput = document.getElementById('sales-cycle');
+        const leadSourceSelect = document.getElementById('lead-source');
+        const resultParagraph = document.getElementById('result');
+
+        calculateButton.addEventListener('click', () => {
+            const dealSize = parseFloat(dealSizeInput.value);
+            const conversionRate = parseFloat(conversionRateInput.value) / 100;
+            const salesCycle = parseFloat(salesCycleInput.value);
+            const leadSource = leadSourceSelect.value;
+
+            let optimizedPipeline = '';
+            if (leadSource === 'organic') {
+                optimizedPipeline = `Optimize social media and content marketing to increase deal size by 10% and conversion rate by 5%.`;
+            } else if (leadSource === 'paid') {
+                optimizedPipeline = `Optimize paid advertising to increase deal size by 15% and conversion rate by 10%.`;
+            } else if (leadSource === 'referral') {
+                optimizedPipeline = `Optimize referral programs to increase deal size by 20% and conversion rate by 15%.`;
+            }
+
+            const revenue = dealSize * conversionRate;
+            const optimizedRevenue = revenue * 1.1; // assuming 10% increase in deal size
+
+            resultParagraph.textContent = `Optimized Sales Pipeline: ${optimizedPipeline} Estimated Revenue: $${optimizedRevenue.toLocaleString()}`;
+        });
+    </script>
+</body>
+</html>
