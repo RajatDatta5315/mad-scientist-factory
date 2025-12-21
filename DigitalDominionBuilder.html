@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigitalDominionBuilder</title>
+    <style>
+        body {
+            background-color: #2f2f2f;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #4f4f4f;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        
+        .header button {
+            background-color: #6f6f6f;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .header button:hover {
+            background-color: #8f8f8f;
+        }
+        
+        .tool-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .tool {
+            margin: 10px;
+            padding: 20px;
+            background-color: #6f6f6f;
+            border-radius: 10px;
+            width: calc(33.33% - 20px);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tool h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .tool ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .tool li {
+            margin-bottom: 10px;
+        }
+        
+        .tool li::before {
+            content: "\2022";
+            margin-right: 10px;
+        }
+        
+        .footer {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .footer p {
+            font-size: 14px;
+            color: #cccccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>DigitalDominionBuilder</h1>
+            <button id="toggle-theme">Switch to Light Theme</button>
+        </div>
+        <div class="tool-container">
+            <div class="tool">
+                <h2>SEO Tool</h2>
+                <ul>
+                    <li>Keyword Research</li>
+                    <li>On-Page Optimization</li>
+                    <li>Technical SEO Audit</li>
+                </ul>
+            </div>
+            <div class="tool">
+                <h2>Content Creation</h2>
+                <ul>
+                    <li>Blog Post Generator</li>
+                    <li>Article Rewriter</li>
+                    <li>Social Media Post Creator</li>
+                </ul>
+            </div>
+            <div class="tool">
+                <h2>Social Media Management</h2>
+                <ul>
+                    <li>Schedule Posts</li>
+                    <li>Analyze Engagement</li>
+                    <li>Monitor Brand Mentions</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer">
+            <p>&copy; 2024 DigitalDominionBuilder</p>
+        </div>
+    </div>
+    <script>
+        document.getElementById('toggle-theme').addEventListener('click', function() {
+            document.body.classList.toggle('light-theme');
+            if (document.body.classList.contains('light-theme')) {
+                document.body.style.backgroundColor = '#ffffff';
+                document.body.style.color = '#2f2f2f';
+                document.querySelectorAll('.container, .tool').forEach(function(element) {
+                    element.style.backgroundColor = '#f7f7f7';
+                });
+                document.querySelectorAll('h1, h2').forEach(function(element) {
+                    element.style.color = '#2f2f2f';
+                });
+                document.querySelectorAll('button').forEach(function(element) {
+                    element.style.backgroundColor = '#6f6f6f';
+                    element.style.color = '#ffffff';
+                });
+            } else {
+                document.body.style.backgroundColor = '#2f2f2f';
+                document.body.style.color = '#ffffff';
+                document.querySelectorAll('.container, .tool').forEach(function(element) {
+                    element.style.backgroundColor = '#4f4f4f';
+                });
+                document.querySelectorAll('h1, h2').forEach(function(element) {
+                    element.style.color = '#ffffff';
+                });
+                document.querySelectorAll('button').forEach(function(element) {
+                    element.style.backgroundColor = '#6f6f6f';
+                    element.style.color = '#ffffff';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
