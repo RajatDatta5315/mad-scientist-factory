@@ -1,6 +1,6 @@
 import requests, json, re, sys, os, random, time, urllib.parse
 
-print("--- 🏭 FACTORY: FUNCTIONAL TOOLS ONLY ---")
+print("--- 🏭 FACTORY: FUNCTIONAL TOOLS (NO SYNTAX ERRORS) ---")
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 HF_TOKEN = os.environ.get("HF_TOKEN")
@@ -12,9 +12,11 @@ if not GROQ_API_KEY or not PAYPAL_EMAIL:
     print("❌ Secrets Missing.")
     sys.exit(1)
 
-# --- 1. IMAGE GENERATOR (Dual Engine) ---
+# --- 1. IMAGE GENERATOR (Reliable) ---
 def generate_image(product_name, specific_prompt):
     filename = f"mockup_{int(time.time())}.jpg"
+    
+    # Try Hugging Face
     if HF_TOKEN:
         try:
             API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
@@ -35,6 +37,7 @@ def generate_image(product_name, specific_prompt):
         return filename
     except: pass
     
+    # Last Resort
     return f"https://placehold.co/800x450/000/0f0.png?text={urllib.parse.quote(product_name)}"
 
 # --- 2. TEXT BRAIN ---
@@ -48,15 +51,18 @@ def generate_text(prompt):
     except: pass
     return "Tool"
 
-# --- 3. LOAD DB ---
+# --- 3. LOAD DB (FIXED PROPERLY) ---
 db = []
 if os.path.exists(DB_FILE):
-    try: with open(DB_FILE, "r") as f: db = json.load(f)
-    except: db = []
+    try:
+        with open(DB_FILE, "r") as f:
+            db = json.load(f)
+    except:
+        db = []
 
 # --- 4. CREATE FUNCTIONAL TOOL ---
 existing = [p['name'] for p in db]
-# Prompt changed: Ask for CALCULATORS/GENERATORS only (Things that work in JS)
+# AI ko bol rahe hain ki sirf WORKING JS TOOLS banaye
 res = generate_text(f"Idea for a B2B HTML Utility Tool (Calculator, Generator, Auditor, Converter) that works 100% in browser JS. NOT 'AI Writer'. Name Only. Not in: {existing}")
 if not res: sys.exit(1)
 new_name = re.sub(r'<[^>]+>', '', res.strip().replace('"', '')).strip()
@@ -64,7 +70,7 @@ if new_name in existing: sys.exit(0)
 
 print(f"🛠️ Building Functional Tool: {new_name}")
 
-# Generate Code with Strict Instructions
+# Generate Code
 prompt = f"""
 Write a single-file HTML/JS tool called '{new_name}'.
 Theme: Dark Mode, Neon Green Accents.
@@ -88,7 +94,7 @@ with open(safe_name, "w") as f: f.write(tool_html)
 visual_desc = generate_text(f"UI keywords for {new_name}")
 img = generate_image(new_name, visual_desc)
 desc = generate_text(f"2-sentence sales copy for {new_name}")
-price = random.choice(["27", "47", "67"]) # Pricing thoda kam kiya taaki bik sake
+price = random.choice(["27", "47", "67"]) 
 link = f"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business={PAYPAL_EMAIL}&item_name={urllib.parse.quote(new_name)}&amount={price}&currency_code=USD"
 
 # --- 5. SAVE ---
@@ -101,4 +107,6 @@ for item in db:
     html += f"<div class='card'><img src='{item['image']}'><div class='info'><div class='title'>{item['name']}</div><p>{item['desc']}</p><div style='display:flex;justify-content:space-between;align-items:center'><div class='price'>${item['price']}</div><a href='{item['link']}' class='btn'>GET ACCESS</a></div></div></div>"
 html += "</div></body></html>"
 with open(WEBSITE_FILE, "w") as f: f.write(html)
+
+print("✅ Factory Done (Fixed).")
 
