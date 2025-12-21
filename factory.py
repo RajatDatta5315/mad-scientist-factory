@@ -1,6 +1,6 @@
 import requests, json, re, sys, os, random, time, urllib.parse
 
-print("--- 🏭 FACTORY: FUNCTIONAL TOOLS (NO SYNTAX ERRORS) ---")
+print("--- 🏭 FACTORY: MARKET RESEARCH SNIPER ---")
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 HF_TOKEN = os.environ.get("HF_TOKEN")
@@ -12,101 +12,149 @@ if not GROQ_API_KEY or not PAYPAL_EMAIL:
     print("❌ Secrets Missing.")
     sys.exit(1)
 
-# --- 1. IMAGE GENERATOR (Reliable) ---
-def generate_image(product_name, specific_prompt):
-    filename = f"mockup_{int(time.time())}.jpg"
-    
-    # Try Hugging Face
-    if HF_TOKEN:
-        try:
-            API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
-            headers = {"Authorization": f"Bearer {HF_TOKEN}"}
-            payload = {"inputs": f"dashboard UI for {product_name}, {specific_prompt}, dark mode, neon green charts, high quality, 8k, no text"}
-            r = requests.post(API_URL, headers=headers, json=payload)
-            if r.status_code == 200:
-                with open(filename, "wb") as f: f.write(r.content)
-                return filename
-        except: pass
-    
-    # Backup: Pollinations (No Logo)
-    try:
-        encoded = urllib.parse.quote(f"futuristic dark software interface {product_name} {specific_prompt}")
-        url = f"https://image.pollinations.ai/prompt/{encoded}?width=800&height=450&nologo=true&model=flux"
-        r = requests.get(url, timeout=10)
-        with open(filename, "wb") as f: f.write(r.content)
-        return filename
-    except: pass
-    
-    # Last Resort
-    return f"https://placehold.co/800x450/000/0f0.png?text={urllib.parse.quote(product_name)}"
-
-# --- 2. TEXT BRAIN ---
-def generate_text(prompt):
+# --- 1. THE BRAIN (LLAMA 3) ---
+def ask_ai(system_prompt, user_prompt):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    payload = {"model": "llama-3.3-70b-versatile", "messages": [{"role": "system", "content": "Output ONLY raw code/text."}, {"role": "user", "content": prompt}]}
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        "temperature": 0.7
+    }
     try:
         r = requests.post(url, headers=headers, data=json.dumps(payload))
-        if r.status_code == 200: return r.json()['choices'][0]['message']['content']
-    except: pass
-    return "Tool"
+        if r.status_code == 200:
+            return r.json()['choices'][0]['message']['content'].strip()
+    except Exception as e:
+        print(f"⚠️ AI Error: {e}")
+    return None
 
-# --- 3. LOAD DB (FIXED PROPERLY) ---
+# --- 2. IMAGE GENERATOR (Pollinations Backup Guaranteed) ---
+def generate_image(product_name):
+    filename = f"mockup_{int(time.time())}.jpg"
+    print("🎨 Generating UI Mockup...")
+    
+    # Strategy: Pollinations (Best for consistent dark UI without watermark)
+    try:
+        prompt = f"futuristic dark ui dashboard for {product_name} software, neon green charts, analytics, high quality, 8k render"
+        encoded = urllib.parse.quote(prompt)
+        url = f"https://image.pollinations.ai/prompt/{encoded}?width=800&height=450&nologo=true&model=flux"
+        
+        r = requests.get(url, timeout=15)
+        if r.status_code == 200:
+            with open(filename, "wb") as f: f.write(r.content)
+            return filename
+    except: pass
+    
+    return "https://placehold.co/800x450/000/0f0.png?text=Tool+Preview"
+
+# --- 3. LOAD DATABASE ---
 db = []
 if os.path.exists(DB_FILE):
     try:
-        with open(DB_FILE, "r") as f:
-            db = json.load(f)
-    except:
-        db = []
+        with open(DB_FILE, "r") as f: db = json.load(f)
+    except: db = []
 
-# --- 4. CREATE FUNCTIONAL TOOL ---
-existing = [p['name'] for p in db]
-# AI ko bol rahe hain ki sirf WORKING JS TOOLS banaye
-res = generate_text(f"Idea for a B2B HTML Utility Tool (Calculator, Generator, Auditor, Converter) that works 100% in browser JS. NOT 'AI Writer'. Name Only. Not in: {existing}")
-if not res: sys.exit(1)
-new_name = re.sub(r'<[^>]+>', '', res.strip().replace('"', '')).strip()
-if new_name in existing: sys.exit(0)
+# --- 4. STEP 1: MARKET RESEARCH (FIND 1 PRODUCT) ---
+existing_tools = [p['name'] for p in db]
+print("🕵️ Doing Market Research...")
 
-print(f"🛠️ Building Functional Tool: {new_name}")
+# Strict prompt to prevent "7000 ideas" or "Long Essays"
+research_prompt = f"""
+You are a Product Manager for a SaaS Agency.
+Analyze the current market needs for Marketing Agencies and Freelancers.
+Select ONE High-Value Micro-Tool idea (Calculator, Generator, Converter, or Auditor) that solves a painful problem.
+It must be buildable in a single HTML/JS file.
 
-# Generate Code
-prompt = f"""
-Write a single-file HTML/JS tool called '{new_name}'.
-Theme: Dark Mode, Neon Green Accents.
-REQUIREMENTS:
-1. MUST BE FULLY FUNCTIONAL using JavaScript.
-2. If it's a calculator, it must calculate.
-3. If it's a generator, it must generate results/text.
-4. NO fake buttons. NO 'API Error' alerts.
-5. Inline CSS/JS.
-Output ONLY RAW HTML.
+CONSTRAINT:
+- DO NOT use these names: {existing_tools}
+- Output ONLY the tool name (Max 4 words).
+- NO description, NO talking. Just the name.
 """
-tool_raw = generate_text(prompt)
-tool_html = tool_raw.replace("```html", "").replace("```", "")
-if "<!DOCTYPE" in tool_html: tool_html = tool_html[tool_html.find("<!DOCTYPE"):]
-if "</html>" in tool_html: tool_html = tool_html[:tool_html.find("</html>")+7]
 
-safe_name = re.sub(r'[^a-zA-Z0-9_]', '', new_name.replace(' ', '_')) + ".html"
-with open(safe_name, "w") as f: f.write(tool_html)
+new_name = ask_ai("You are a strict naming machine. Output ONLY the name.", research_prompt)
 
-# Image & Data
-visual_desc = generate_text(f"UI keywords for {new_name}")
-img = generate_image(new_name, visual_desc)
-desc = generate_text(f"2-sentence sales copy for {new_name}")
-price = random.choice(["27", "47", "67"]) 
+# SANITY CHECK: Agar AI ne pagalpan kiya (lamba text diya), to hum use reject kar denge
+if not new_name or len(new_name) > 50 or "\n" in new_name:
+    print(f"⚠️ AI Hallucinated: '{new_name}'... Switching to Backup Idea.")
+    new_name = f"Agency_ROI_Calculator_{int(time.time())}"
+else:
+    # Remove quotes and special chars
+    new_name = re.sub(r'[^a-zA-Z0-9 ]', '', new_name).strip()
+
+print(f"💎 Winning Idea Selected: {new_name}")
+
+# --- 5. STEP 2: EXECUTION (BUILD THE TOOL) ---
+print("🏗️ Engineering the Code...")
+
+code_prompt = f"""
+Act as a Senior Full Stack Developer.
+Write the complete code for a web tool called '{new_name}'.
+Theme: Cyberpunk Dark Mode (Black background, Neon Green accents).
+
+REQUIREMENTS:
+1. Single HTML file containing CSS, HTML, and JS.
+2. The tool MUST BE FUNCTIONAL. (If it's a calculator, the logic must work).
+3. Professional UI (Cards, Shadows, rounded buttons).
+4. No external API calls (keep it pure JS).
+5. Output ONLY the raw HTML code. Do not wrap in markdown blocks.
+"""
+
+tool_code = ask_ai("Output ONLY HTML code. No markdown.", code_prompt)
+
+if not tool_code or "<html" not in tool_code:
+    print("❌ Code Gen Failed.")
+    sys.exit(1)
+
+# Clean code
+tool_code = tool_code.replace("```html", "").replace("```", "")
+
+# Save File
+safe_filename = new_name.replace(" ", "_") + ".html"
+with open(safe_filename, "w") as f: f.write(tool_code)
+
+# --- 6. STEP 3: PACKAGING (Image & Copy) ---
+img = generate_image(new_name)
+desc = ask_ai("Write 1 short punchy sales sentence.", f"Sell {new_name} to an agency owner.")
+price = random.choice(["29", "49", "67"])
 link = f"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business={PAYPAL_EMAIL}&item_name={urllib.parse.quote(new_name)}&amount={price}&currency_code=USD"
 
-# --- 5. SAVE ---
-db.insert(0, {"name": new_name, "desc": desc.replace('"',''), "price": price, "file": safe_name, "image": img, "link": link})
+# --- 7. SAVE TO STORE ---
+db.insert(0, {
+    "name": new_name,
+    "desc": desc.replace('"', ''),
+    "price": price,
+    "file": safe_filename,
+    "image": img,
+    "link": link
+})
+
 with open(DB_FILE, "w") as f: json.dump(db, f, indent=2)
 
-# --- 6. WEBSITE UPDATE ---
-html = """<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>DryPaper HQ</title><link href='https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap' rel='stylesheet'><style>body{background:#050505;color:#fff;font-family:'Outfit',sans-serif;margin:0}.header{text-align:center;padding:100px 20px}.grid{max-width:1200px;margin:50px auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:40px;padding:20px}.card{background:#0a0a0a;border:1px solid #222;border-radius:20px;overflow:hidden;transition:0.3s}.card:hover{border-color:#00ff88;transform:translateY(-10px)}.card img{width:100%;height:220px;object-fit:cover}.info{padding:30px}.title{font-size:1.5rem;font-weight:bold}.price{font-size:1.5rem;font-weight:800;color:#fff}.btn{display:inline-block;background:#fff;color:#000;padding:10px 30px;border-radius:50px;text-decoration:none;font-weight:bold;margin-top:20px}.btn:hover{background:#00ff88}</style></head><body><div class='header'><h1>DRYPAPER HQ</h1><p>Functional Assets for Agencies</p></div><div class='grid'>"""
+# --- 8. UPDATE WEBSITE ---
+print("🌐 Updating Showroom...")
+html = """<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>DryPaper HQ</title><link href='https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap' rel='stylesheet'><style>body{background:#050505;color:#fff;font-family:'Outfit',sans-serif;margin:0}.header{text-align:center;padding:100px 20px}.header h1{font-size:3rem;margin-bottom:10px;background:linear-gradient(to right,#fff,#888);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.grid{max-width:1200px;margin:50px auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:40px;padding:20px}.card{background:#0a0a0a;border:1px solid #222;border-radius:20px;overflow:hidden;transition:0.3s;display:flex;flex-direction:column}.card:hover{border-color:#00ff88;transform:translateY(-10px)}.card img{width:100%;height:220px;object-fit:cover;border-bottom:1px solid #222}.info{padding:25px;flex-grow:1;display:flex;flex-direction:column}.title{font-size:1.4rem;font-weight:bold;margin-bottom:10px}.desc{color:#888;font-size:0.9rem;margin-bottom:20px;line-height:1.5}.footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center}.price{font-size:1.5rem;font-weight:800;color:#fff}.btn{background:#fff;color:#000;padding:10px 25px;border-radius:50px;text-decoration:none;font-weight:bold;transition:0.2s}.btn:hover{background:#00ff88;box-shadow:0 0 15px rgba(0,255,136,0.3)}</style></head><body><div class='header'><h1>DRYPAPER HQ</h1><p style='color:#666'>Premium Utility Assets</p></div><div class='grid'>"""
+
 for item in db:
-    html += f"<div class='card'><img src='{item['image']}'><div class='info'><div class='title'>{item['name']}</div><p>{item['desc']}</p><div style='display:flex;justify-content:space-between;align-items:center'><div class='price'>${item['price']}</div><a href='{item['link']}' class='btn'>GET ACCESS</a></div></div></div>"
+    html += f"""
+    <div class='card'>
+        <img src='{item['image']}' alt='{item['name']}'>
+        <div class='info'>
+            <div class='title'>{item['name']}</div>
+            <div class='desc'>{item['desc']}</div>
+            <div class='footer'>
+                <div class='price'>${item['price']}</div>
+                <a href='{item['link']}' class='btn'>GET ACCESS</a>
+            </div>
+        </div>
+    </div>
+    """
+
 html += "</div></body></html>"
 with open(WEBSITE_FILE, "w") as f: f.write(html)
 
-print("✅ Factory Done (Fixed).")
+print("✅ Mission Accomplished: 1 High-Quality Tool Deployed.")
 
