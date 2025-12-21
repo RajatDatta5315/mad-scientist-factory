@@ -2,63 +2,76 @@ import json, os, smtplib, requests, random, time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-print("--- 🏴‍☠️ MARKETING: GITHUB EMAIL SNIPER ---")
+print("--- 🏴‍☠️ MARKETING: GITHUB ELITE SNIPER ---")
 
 SMTP_EMAIL = os.environ.get("SMTP_EMAIL")
 SMTP_PASS = os.environ.get("SMTP_PASSWORD")
 TARGET_EMAIL = os.environ.get("TARGET_EMAIL")
-# GitHub Token (Automatically provided by Actions usually, or limits are 60/hr)
 GH_TOKEN = os.environ.get("GITHUB_TOKEN") 
 
 DB_FILE = "products.json"
-if not os.path.exists(DB_FILE): exit()
+# Fallback if DB missing
+if not os.path.exists(DB_FILE):
+    print("⚠️ DB Missing. Skipping.")
+    exit()
+
 with open(DB_FILE, "r") as f: db = json.load(f)
 latest = db[0]
 
-# --- 1. GITHUB USER HUNTER ---
+# --- 1. GITHUB USER HUNTER (HIREABLE ONLY) ---
 def hunt_github_leads():
-    print("🕵️ Sniping Emails from GitHub Users...")
+    print("🕵️ Sniping 'Hireable' Users on GitHub...")
     leads = []
     
-    keywords = ["agency", "founder", "freelancer", "developer"]
+    # Target Keywords: Log jo agencies chalate hain ya freelance karte hain
+    keywords = ["agency", "freelancer", "fullstack", "founder", "consultant"]
     keyword = random.choice(keywords)
     
-    # Search for users with keyword in bio
-    # Sort by joined (newest) or followers
-    url = f"https://api.github.com/search/users?q={keyword}+type:user&per_page=30&sort=joined&order=desc"
+    # URL: Search Users + Is:Hireable (High Email Success Rate)
+    url = f"https://api.github.com/search/users?q={keyword}+is:hireable&per_page=40&sort=updated"
     
     headers = {"Accept": "application/vnd.github.v3+json"}
-    if GH_TOKEN: headers["Authorization"] = f"token {GH_TOKEN}"
+    if GH_TOKEN: 
+        headers["Authorization"] = f"token {GH_TOKEN}"
+        print("✅ Authenticated Mode: ON (Unlimited Power)")
+    else:
+        print("⚠️ Warning: No Token Found. Rate Limits may apply.")
     
     try:
         r = requests.get(url, headers=headers)
+        if r.status_code != 200:
+            print(f"❌ API Error: {r.status_code} - {r.text}")
+            return []
+            
         data = r.json()
         
         if "items" in data:
-            print(f"   found {len(data['items'])} potential targets. Scanning profiles...")
+            print(f"   🔍 Scanning {len(data['items'])} profiles for {keyword}...")
             for user in data['items']:
-                # Fetch detailed profile to get email
+                # Profile fetch kar ke email check karo
                 u_url = user['url']
                 u_r = requests.get(u_url, headers=headers)
-                u_data = u_r.json()
+                if u_r.status_code == 200:
+                    u_data = u_r.json()
+                    email = u_data.get('email')
+                    
+                    if email and "users.noreply" not in email:
+                        print(f"   🎯 TARGET ACQUIRED: {email}")
+                        leads.append(email)
                 
-                email = u_data.get('email')
-                if email:
-                    print(f"   🎯 Got one: {email}")
-                    leads.append(email)
-                time.sleep(0.5) # Be gentle with API
+                if len(leads) >= 15: break # Daily Quota
+                
     except Exception as e:
-        print(f"❌ GitHub API Error: {e}")
+        print(f"❌ Critical Error: {e}")
         
-    return list(set(leads))[:20]
+    return list(set(leads))
 
 # --- 2. SENDER ---
 def send_cold_email(to_email, product_name, product_link, price):
     if not SMTP_EMAIL or not SMTP_PASS: return
     
-    # Simple, direct script for developers/agencies
-    subject = f"Tool for your projects: {product_name}"
-    body = f"Hi,\n\nFound your profile on GitHub.\n\nI built a utility called {product_name} that automates workflow.\nIt's a pure JS tool (no bloat).\n\nCheck it out: {product_link}\n\nCheers,\nRajat"
+    subject = f"Tool for your dev workflow: {product_name}"
+    body = f"Hi,\n\nSaw your GitHub profile (Hireable status).\n\nI built a no-nonsense utility called {product_name}.\nIt's a single-file tool designed to speed up your work.\n\nCheck it out: {product_link}\n\nCheers,\nRajat"
     
     msg = MIMEMultipart()
     msg['From'] = f"Rajat <{SMTP_EMAIL}>"
@@ -79,7 +92,7 @@ def send_cold_email(to_email, product_name, product_link, price):
 fresh_leads = hunt_github_leads()
 
 if fresh_leads:
-    print(f"⚔️ ATTACKING {len(fresh_leads)} GITHUB DEVS...")
+    print(f"⚔️ ATTACKING {len(fresh_leads)} TARGETS...")
     for lead in fresh_leads:
         send_cold_email(lead, latest['name'], f"https://www.drypaperhq.com/{latest['file']}", latest['price'])
 
@@ -89,8 +102,8 @@ if os.environ.get("EMAIL_USER"):
         msg = MIMEMultipart()
         msg['From'] = os.environ.get("EMAIL_USER")
         msg['To'] = TARGET_EMAIL
-        msg['Subject'] = f"✅ GITHUB RAID REPORT: {len(fresh_leads)} EMAILS"
-        body = f"Source: GitHub User Search\nTargets Hit: {len(fresh_leads)}\n\n(These are real developer/agency emails from their profiles.)"
+        msg['Subject'] = f"✅ SUCCESS: {len(fresh_leads)} REAL EMAILS"
+        body = f"Product: {latest['name']}\n\n🎯 Real GitHub Leads Hit: {len(fresh_leads)}\n\nMode: Authenticated (High Success)"
         msg.attach(MIMEText(body, 'plain'))
         s = smtplib.SMTP('smtp.gmail.com', 587)
         s.starttls()
@@ -98,5 +111,4 @@ if os.environ.get("EMAIL_USER"):
         s.sendmail(os.environ.get("EMAIL_USER"), TARGET_EMAIL, msg.as_string())
         s.quit()
     except: pass
-
 
