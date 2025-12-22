@@ -2,7 +2,7 @@ import json, os, smtplib, requests, random, time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-print("--- 🏴‍☠️ MARKETING: GITHUB ELITE SNIPER ---")
+print("--- 🏴‍☠️ MARKETING: GITHUB ELITE SNIPER (WITH DB) ---")
 
 SMTP_EMAIL = os.environ.get("SMTP_EMAIL")
 SMTP_PASS = os.environ.get("SMTP_PASSWORD")
@@ -10,6 +10,8 @@ TARGET_EMAIL = os.environ.get("TARGET_EMAIL")
 GH_TOKEN = os.environ.get("GITHUB_TOKEN") 
 
 DB_FILE = "products.json"
+LEADS_FILE = "leads.csv" # 👑 KING'S DATABASE
+
 # Fallback if DB missing
 if not os.path.exists(DB_FILE):
     print("⚠️ DB Missing. Skipping.")
@@ -18,16 +20,28 @@ if not os.path.exists(DB_FILE):
 with open(DB_FILE, "r") as f: db = json.load(f)
 latest = db[0]
 
+# --- 0. SAVE LEADS TO CSV ---
+def save_leads_to_db(leads):
+    # Check if file exists, if not create header
+    if not os.path.exists(LEADS_FILE):
+        with open(LEADS_FILE, "w") as f:
+            f.write("email,source,date,status\n")
+    
+    # Append new leads
+    with open(LEADS_FILE, "a") as f:
+        today = time.strftime("%Y-%m-%d")
+        for email in leads:
+            f.write(f"{email},github,{today},sent\n")
+    print(f"💾 Saved {len(leads)} leads to {LEADS_FILE}")
+
 # --- 1. GITHUB USER HUNTER (HIREABLE ONLY) ---
 def hunt_github_leads():
     print("🕵️ Sniping 'Hireable' Users on GitHub...")
     leads = []
     
-    # Target Keywords: Log jo agencies chalate hain ya freelance karte hain
     keywords = ["agency", "freelancer", "fullstack", "founder", "consultant"]
     keyword = random.choice(keywords)
     
-    # URL: Search Users + Is:Hireable (High Email Success Rate)
     url = f"https://api.github.com/search/users?q={keyword}+is:hireable&per_page=40&sort=updated"
     
     headers = {"Accept": "application/vnd.github.v3+json"}
@@ -48,7 +62,6 @@ def hunt_github_leads():
         if "items" in data:
             print(f"   🔍 Scanning {len(data['items'])} profiles for {keyword}...")
             for user in data['items']:
-                # Profile fetch kar ke email check karo
                 u_url = user['url']
                 u_r = requests.get(u_url, headers=headers)
                 if u_r.status_code == 200:
@@ -59,7 +72,7 @@ def hunt_github_leads():
                         print(f"   🎯 TARGET ACQUIRED: {email}")
                         leads.append(email)
                 
-                if len(leads) >= 15: break # Daily Quota
+                if len(leads) >= 15: break 
                 
     except Exception as e:
         print(f"❌ Critical Error: {e}")
@@ -93,6 +106,10 @@ fresh_leads = hunt_github_leads()
 
 if fresh_leads:
     print(f"⚔️ ATTACKING {len(fresh_leads)} TARGETS...")
+    
+    # SAVE TO DATABASE FIRST
+    save_leads_to_db(fresh_leads)
+    
     for lead in fresh_leads:
         send_cold_email(lead, latest['name'], f"https://www.drypaperhq.com/{latest['file']}", latest['price'])
 
@@ -102,8 +119,8 @@ if os.environ.get("EMAIL_USER"):
         msg = MIMEMultipart()
         msg['From'] = os.environ.get("EMAIL_USER")
         msg['To'] = TARGET_EMAIL
-        msg['Subject'] = f"✅ SUCCESS: {len(fresh_leads)} REAL EMAILS"
-        body = f"Product: {latest['name']}\n\n🎯 Real GitHub Leads Hit: {len(fresh_leads)}\n\nMode: Authenticated (High Success)"
+        msg['Subject'] = f"✅ SUCCESS: {len(fresh_leads)} REAL EMAILS + DB SAVED"
+        body = f"Product: {latest['name']}\n\n🎯 Real GitHub Leads Hit: {len(fresh_leads)}\n💾 Database Updated: leads.csv\n\nMode: Authenticated"
         msg.attach(MIMEText(body, 'plain'))
         s = smtplib.SMTP('smtp.gmail.com', 587)
         s.starttls()
