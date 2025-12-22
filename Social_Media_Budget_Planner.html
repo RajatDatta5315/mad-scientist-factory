@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Budget Planner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2f2f2f;
+            color: #fff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .input-group input {
+            width: 100%;
+            height: 40px;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+        }
+        .button {
+            width: 100%;
+            height: 40px;
+            background-color: #555;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #666;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #444;
+            border: 1px solid #555;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Social Media Budget Planner</h1>
+        </div>
+        <form id="budget-form">
+            <div class="input-group">
+                <label for="total-budget">Total Budget:</label>
+                <input type="number" id="total-budget" placeholder="Enter total budget">
+            </div>
+            <div class="input-group">
+                <label for="facebook-ads">Facebook Ads:</label>
+                <input type="number" id="facebook-ads" placeholder="Enter Facebook ads budget">
+            </div>
+            <div class="input-group">
+                <label for="instagram-ads">Instagram Ads:</label>
+                <input type="number" id="instagram-ads" placeholder="Enter Instagram ads budget">
+            </div>
+            <div class="input-group">
+                <label for="twitter-ads">Twitter Ads:</label>
+                <input type="number" id="twitter-ads" placeholder="Enter Twitter ads budget">
+            </div>
+            <div class="input-group">
+                <label for="linkedin-ads">LinkedIn Ads:</label>
+                <input type="number" id="linkedin-ads" placeholder="Enter LinkedIn ads budget">
+            </div>
+            <button class="button" type="submit">Calculate Budget</button>
+        </form>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const budgetForm = document.getElementById('budget-form');
+        const resultDiv = document.getElementById('result');
+
+        budgetForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const totalBudget = parseFloat(document.getElementById('total-budget').value);
+            const facebookAds = parseFloat(document.getElementById('facebook-ads').value);
+            const instagramAds = parseFloat(document.getElementById('instagram-ads').value);
+            const twitterAds = parseFloat(document.getElementById('twitter-ads').value);
+            const linkedinAds = parseFloat(document.getElementById('linkedin-ads').value);
+
+            if (isNaN(totalBudget) || totalBudget <= 0) {
+                resultDiv.innerHTML = 'Please enter a valid total budget';
+                return;
+            }
+
+            const totalAdsBudget = facebookAds + instagramAds + twitterAds + linkedinAds;
+
+            if (totalAdsBudget > totalBudget) {
+                resultDiv.innerHTML = 'Total ads budget exceeds total budget';
+                return;
+            }
+
+            const remainingBudget = totalBudget - totalAdsBudget;
+
+            resultDiv.innerHTML = `
+                <h2>Budget Summary</h2>
+                <p>Total Budget: $${totalBudget.toFixed(2)}</p>
+                <p>Facebook Ads: $${facebookAds.toFixed(2)}</p>
+                <p>Instagram Ads: $${instagramAds.toFixed(2)}</p>
+                <p>Twitter Ads: $${twitterAds.toFixed(2)}</p>
+                <p>LinkedIn Ads: $${linkedinAds.toFixed(2)}</p>
+                <p>Total Ads Budget: $${totalAdsBudget.toFixed(2)}</p>
+                <p>Remaining Budget: $${remainingBudget.toFixed(2)}</p>
+            `;
+        });
+    </script>
+</body>
+</html>
