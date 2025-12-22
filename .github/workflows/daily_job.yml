@@ -2,8 +2,8 @@ name: Raja Empire Automation
 
 on:
   schedule:
-    - cron: '15 8 * * *' # 8:15 UTC = 1:45 PM India
-  workflow_dispatch: # Ye button manual run ke liye hai
+    - cron: '30 8 * * *' # India Time: 2:00 PM
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,7 +21,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install Tools
-        run: pip install requests
+        run: pip install requests tweepy praw
 
       # STEP 1: FACTORY (Asli Functional Tools Banayega)
       - name: 🏭 Run Factory
@@ -31,7 +31,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python factory.py
 
-      # STEP 2: MARKETING (Github Leads - AB TOKEN KE SAATH)
+      # STEP 2: MARKETING (Github Leads + BCC God Mode)
       - name: 📢 Run Marketing
         if: success() 
         env:
@@ -41,15 +41,29 @@ jobs:
           TARGET_EMAIL: ${{ secrets.TARGET_EMAIL }}
           SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # <--- YE HAI ASLI MAGIC KEY
-          HASHNODE_PUB_ID: ${{ secrets.HASHNODE_PUB_ID }} # Hashnode ID bhi add kar di
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python marketing.py
+
+      # STEP 3: SOCIAL BLAST (Content Distribution)
+      # Agar tune social_blast.py upload kar diya hai to ye step chalega
+      - name: 🚀 Run Social Blast
+        if: success()
+        env:
+          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
+          HASHNODE_PUB_ID: ${{ secrets.HASHNODE_PUB_ID }}
+          HASHNODE_TOKEN: ${{ secrets.HASHNODE_TOKEN }}
           TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
           TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
           TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
           TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
-        run: python marketing.py
+        run: |
+          if [ -f social_blast.py ]; then
+            python social_blast.py
+          else
+            echo "Social Blast script not found, skipping."
+          fi
 
-      # STEP 3: SAVE EVERYTHING
+      # STEP 4: SAVE EVERYTHING
       - name: 💾 Save Progress
         if: always()
         run: |
