@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Pricing Estimator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2f2f2f;
+            color: #fff;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #3f3f3f;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            height: 40px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4f4f4f;
+            color: #fff;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            background-color: #5f5f5f;
+        }
+        .button {
+            width: 100%;
+            height: 40px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #6f6f6f;
+            color: #fff;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #7f7f7f;
+        }
+        .result {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Project Pricing Estimator</h1>
+        </div>
+        <form id="estimator-form">
+            <div class="form-group">
+                <label for="project-type">Select Project Type:</label>
+                <select id="project-type" name="project-type">
+                    <option value="web-development">Web Development</option>
+                    <option value="mobile-app">Mobile App</option>
+                    <option value="desktop-app">Desktop App</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="project-complexity">Select Project Complexity:</label>
+                <select id="project-complexity" name="project-complexity">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="project-duration">Estimated Project Duration (weeks):</label>
+                <input type="number" id="project-duration" name="project-duration" min="1" max="52" value="1">
+            </div>
+            <div class="form-group">
+                <label for="team-size">Team Size:</label>
+                <input type="number" id="team-size" name="team-size" min="1" max="10" value="1">
+            </div>
+            <button type="submit" class="button">Estimate Price</button>
+        </form>
+        <div class="result" id="result"></div>
+    </div>
+    <script>
+        const form = document.getElementById('estimator-form');
+        const resultElement = document.getElementById('result');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const projectType = document.getElementById('project-type').value;
+            const projectComplexity = document.getElementById('project-complexity').value;
+            const projectDuration = parseInt(document.getElementById('project-duration').value);
+            const teamSize = parseInt(document.getElementById('team-size').value);
+
+            let basePrice;
+            switch (projectType) {
+                case 'web-development':
+                    basePrice = 1000;
+                    break;
+                case 'mobile-app':
+                    basePrice = 2000;
+                    break;
+                case 'desktop-app':
+                    basePrice = 3000;
+                    break;
+            }
+
+            let complexityMultiplier;
+            switch (projectComplexity) {
+                case 'low':
+                    complexityMultiplier = 1;
+                    break;
+                case 'medium':
+                    complexityMultiplier = 1.5;
+                    break;
+                case 'high':
+                    complexityMultiplier = 2;
+                    break;
+            }
+
+            const estimatedPrice = basePrice * complexityMultiplier * projectDuration * teamSize;
+            resultElement.textContent = `Estimated Price: $${estimatedPrice.toLocaleString()}`;
+        });
+    </script>
+</body>
+</html>
