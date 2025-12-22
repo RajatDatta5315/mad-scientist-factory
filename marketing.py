@@ -2,11 +2,11 @@ import json, os, smtplib, requests, random, time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-print("--- 🏴‍☠️ MARKETING: GITHUB ELITE SNIPER (REPLY-TO FIXED) ---")
+print("--- 🏴‍☠️ MARKETING: GOD MODE (BCC ENABLED) ---")
 
 SMTP_EMAIL = os.environ.get("SMTP_EMAIL")
 SMTP_PASS = os.environ.get("SMTP_PASSWORD")
-TARGET_EMAIL = os.environ.get("TARGET_EMAIL") # Ye tera Personal Gmail hai
+TARGET_EMAIL = os.environ.get("TARGET_EMAIL") # Tera Gmail
 GH_TOKEN = os.environ.get("GITHUB_TOKEN") 
 
 DB_FILE = "products.json"
@@ -59,7 +59,7 @@ def hunt_github_leads():
     except Exception as e: print(f"❌ Error: {e}")
     return list(set(leads))
 
-# --- 2. SENDER (WITH REPLY-TO FIX) ---
+# --- 2. SENDER (WITH BCC GOD MODE) ---
 def send_cold_email(to_email, product_name, product_link, price):
     if not SMTP_EMAIL or not SMTP_PASS: return
     
@@ -71,18 +71,19 @@ def send_cold_email(to_email, product_name, product_link, price):
     msg['To'] = to_email
     msg['Subject'] = subject
     
-    # 🔥 MAGIC LINE: Reply seedha tere Gmail pe aayega
+    # 🔥 GOD MODE: Ek copy tere Gmail pe aayegi
     if TARGET_EMAIL:
         msg.add_header('Reply-To', TARGET_EMAIL)
+        msg['Bcc'] = TARGET_EMAIL 
 
     msg.attach(MIMEText(body, 'plain'))
     
     try:
         server = smtplib.SMTP_SSL('smtp.hostinger.com', 465)
         server.login(SMTP_EMAIL, SMTP_PASS)
-        server.sendmail(SMTP_EMAIL, to_email, msg.as_string())
+        server.sendmail(SMTP_EMAIL, [to_email, TARGET_EMAIL], msg.as_string()) # Send to both
         server.quit()
-        print(f"🚀 SENT TO: {to_email}")
+        print(f"🚀 SENT TO: {to_email} (+ BCC Copy to Boss)")
         time.sleep(2)
     except: pass
 
@@ -101,7 +102,7 @@ if os.environ.get("EMAIL_USER"):
         msg['From'] = os.environ.get("EMAIL_USER")
         msg['To'] = TARGET_EMAIL
         msg['Subject'] = f"✅ SUCCESS: {len(fresh_leads)} EMAILS SENT"
-        body = f"Product: {latest['name']}\nLeads Hit: {len(fresh_leads)}\n\n(Replies will come to this email)."
+        body = f"Product: {latest['name']}\nLeads Hit: {len(fresh_leads)}\n\n(Check your Inbox. You received BCC copies of all emails)."
         msg.attach(MIMEText(body, 'plain'))
         s = smtplib.SMTP('smtp.gmail.com', 587)
         s.starttls()
