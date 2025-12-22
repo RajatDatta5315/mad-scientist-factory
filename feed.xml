@@ -1,1 +1,95 @@
-<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title>DryPaper HQ</title><link>https://www.drypaperhq.com</link><item><title>ApexLeadAccelerator</title><link>https://www.drypaperhq.com/ApexLeadAccelerator.html</link><description>Unleash the full potential of your sales team with ApexLeadAccelerator, the cutting-edge solution that supercharges your lead generation and conversion rates. By leveraging the power of ApexLeadAccelerator, you'll be able to crush your sales targets and leave the competition in the dust, driving unparalleled growth and success for your business.</description></item><item><title>DigitalDominionBuilder</title><link>https://www.drypaperhq.com/DigitalDominionBuilder.html</link><description>Unlock the secrets to online success with DigitalDominionBuilder, the ultimate tool for entrepreneurs and small business owners looking to establish a dominant presence in the digital landscape. With DigitalDominionBuilder, you'll be empowered to drive more traffic, boost conversions, and skyrocket your revenue, all while leaving the competition in the dust.</description></item><item><title>RevenueRampager</title><link>https://www.drypaperhq.com/RevenueRampager.html</link><description>Unlock explosive growth and shatter revenue records with RevenueRampager, the game-changing solution that turbocharges your sales funnel and puts your profits on autopilot. By harnessing the power of AI-driven insights and cutting-edge marketing strategies, RevenueRampager helps you dominate your competition and achieve unparalleled success in record time.</description></item><item><title>MarketMaverickXEMPLARY</title><link>https://www.drypaperhq.com/MarketMaverickXEMPLARY.html</link><description>Unlock the secret to dominating your competition with MarketMaverickX, the game-changing platform that empowers you to outmaneuver, outperform, and outshine in today's fast-paced market. Experience the thrill of explosive growth and unparalleled success as MarketMaverickX revolutionizes your business, turning you into the ultimate market maverick.</description></item><item><title>ProfitMaximizePro</title><link>https://www.drypaperhq.com/ProfitMaximizePro.html</link><description>Unlock the secret to skyrocketing your profits with ProfitMaximizePro, the ultimate game-changer that helps you dominate your competition and take your business to unprecedented heights. By leveraging the power of ProfitMaximizePro, you'll be able to maximize your revenue, optimize your operations, and achieve unparalleled success in no time.</description></item></channel></rss>
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
+<channel>
+    <title>DryPaper HQ</title>
+    <link>https://www.drypaperhq.com</link>
+    <description>Premium AI Automation Tools</description>
+
+    <item>
+        <g:id>Conversion_Rate_Calculator.html</g:id>
+        <g:title>Conversion Rate Calculator</g:title>
+        <g:description>Unlock the secret to maximizing your clients' ROI and transforming your agency into a revenue-generating powerhouse with our Conversion Rate Calculator - the ultimate game-changer that helps you pinpoint profit-boosting opportunities, optimize campaigns, and deliver jaw-dropping results that will leave your clients begging for more!</g:description>
+        <g:link>https://www.drypaperhq.com</g:link>
+        <g:image_link>https://www.drypaperhq.com/mockup_1766423729.jpg</g:image_link>
+        <g:condition>new</g:condition>
+        <g:availability>in stock</g:availability>
+        <g:price>29 USD</g:price>
+        <g:brand>DryPaper</g:brand>
+    </item>
+    <item>
+        <g:id>Project_Pricing_Estimator.html</g:id>
+        <g:title>Project Pricing Estimator</g:title>
+        <g:description>Transform your business with our Project Pricing Estimator, the game-changing tool that helps you quote with confidence, win more bids, and boost profitability in just minutes!</g:description>
+        <g:link>https://www.drypaperhq.com</g:link>
+        <g:image_link>https://www.drypaperhq.com/https://placehold.co/800x450/000/0f0.png?text=Tool+Preview</g:image_link>
+        <g:condition>new</g:condition>
+        <g:availability>in stock</g:availability>
+        <g:price>29 USD</g:price>
+        <g:brand>DryPaper</g:brand>
+    </item>
+    <item>
+        <g:id>Client_Acquisition_Cost_Calculator.html</g:id>
+        <g:title>Client Acquisition Cost Calculator</g:title>
+        <g:description>Unlock the secret to maximizing your marketing budget with our Client Acquisition Cost Calculator, and discover how to turn every dollar into a profitable customer!</g:description>
+        <g:link>https://www.drypaperhq.com</g:link>
+        <g:image_link>https://www.drypaperhq.com/mockup_1766395601.jpg</g:image_link>
+        <g:condition>new</g:condition>
+        <g:availability>in stock</g:availability>
+        <g:price>67 USD</g:price>
+        <g:brand>DryPaper</g:brand>
+    </item>
+    <item>
+        <g:id>Influencer_Outreach_Cost_Estimator.html</g:id>
+        <g:title>Influencer Outreach Cost Estimator</g:title>
+        <g:description> Revolutionize your influencer marketing campaigns with our game-changing Influencer Outreach Cost Estimator, which instantly calculates the exact cost of partnering with social media's biggest stars and saves you thousands of dollars in negotiation time!</g:description>
+        <g:link>https://www.drypaperhq.com</g:link>
+        <g:image_link>https://www.drypaperhq.com/mockup_1766394213.jpg</g:image_link>
+        <g:condition>new</g:condition>
+        <g:availability>in stock</g:availability>
+        <g:price>49 USD</g:price>
+        <g:brand>DryPaper</g:brand>
+    </item>
+    <item>
+        <g:id>Agency_Fee_Calculator.html</g:id>
+        <g:title>Agency Fee Calculator</g:title>
+        <g:description>Unlock instant profitability insights with our Agency Fee Calculator, the ultimate game-changer that helps you optimize pricing, maximize revenue, and outshine the competition in minutes!</g:description>
+        <g:link>https://www.drypaperhq.com</g:link>
+        <g:image_link>https://www.drypaperhq.com/https://placehold.co/800x450/000/0f0.png?text=Tool+Preview</g:image_link>
+        <g:condition>new</g:condition>
+        <g:availability>in stock</g:availability>
+        <g:price>29 USD</g:price>
+        <g:brand>DryPaper</g:brand>
+    </item>
+    <item>
+        <g:id>Social_Media_Budget_Planner.html</g:id>
+        <g:title>Social Media Budget Planner</g:title>
+        <g:description>Transform your social media strategy with our game-changing Budget Planner, and skyrocket your online presence with data-driven decisions that drive real results and maximize your ROI!</g:description>
+        <g:link>https://www.drypaperhq.com</g:link>
+        <g:image_link>https://www.drypaperhq.com/mockup_1766386129.jpg</g:image_link>
+        <g:condition>new</g:condition>
+        <g:availability>in stock</g:availability>
+        <g:price>67 USD</g:price>
+        <g:brand>DryPaper</g:brand>
+    </item>
+    <item>
+        <g:id>Content_Marketing_ROI_Calculator.html</g:id>
+        <g:title>Content Marketing ROI Calculator</g:title>
+        <g:description>Unlock the secret to justifying your content marketing budgets and wowing clients with data-driven results using our intuitive Content Marketing ROI Calculator, guaranteed to boost your agency's profitability and growth.</g:description>
+        <g:link>https://www.drypaperhq.com</g:link>
+        <g:image_link>https://www.drypaperhq.com/mockup_1766340617.jpg</g:image_link>
+        <g:condition>new</g:condition>
+        <g:availability>in stock</g:availability>
+        <g:price>49 USD</g:price>
+        <g:brand>DryPaper</g:brand>
+    </item>
+    <item>
+        <g:id>SEO_Keyword_Auditor.html</g:id>
+        <g:title>SEO Keyword Auditor</g:title>
+        <g:description>Unlock the full potential of your clients' online presence with our SEO Keyword Auditor, the game-changing tool that streamlines keyword research, identifies gaps, and boosts campaign ROI, all while saving your team time and increasing your agency's competitive edge.</g:description>
+        <g:link>https://www.drypaperhq.com</g:link>
+        <g:image_link>https://www.drypaperhq.com/mockup_1766340087.jpg</g:image_link>
+        <g:condition>new</g:condition>
+        <g:availability>in stock</g:availability>
+        <g:price>49 USD</g:price>
+        <g:brand>DryPaper</g:brand>
+    </item></channel></rss>

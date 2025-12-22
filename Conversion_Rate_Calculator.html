@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversion Rate Calculator</title>
+    <style>
+        body {
+            background-color: #000;
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
+        }
+        .container {
+            width: 80%;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .input-field {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .input-field label {
+            margin-bottom: 10px;
+        }
+        .input-field input {
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(to right, #00ff88, #00ff88);
+            color: #000;
+            cursor: pointer;
+        }
+        .button:hover {
+            background: linear-gradient(to right, #00ff88, #00ff88);
+            opacity: 0.8;
+        }
+        .result {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Conversion Rate Calculator</h1>
+        <div class="input-field">
+            <label for="total-visitors">Total Visitors:</label>
+            <input type="number" id="total-visitors" placeholder="Enter total visitors">
+        </div>
+        <div class="input-field">
+            <label for="conversions">Conversions:</label>
+            <input type="number" id="conversions" placeholder="Enter conversions">
+        </div>
+        <button class="button" onclick="calculateConversionRate()">Calculate Conversion Rate</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function calculateConversionRate() {
+            const totalVisitors = document.getElementById('total-visitors').value;
+            const conversions = document.getElementById('conversions').value;
+            if (totalVisitors && conversions) {
+                const conversionRate = (conversions / totalVisitors) * 100;
+                document.getElementById('result').innerText = `Conversion Rate: ${conversionRate.toFixed(2)}%`;
+            } else {
+                document.getElementById('result').innerText = 'Please enter both total visitors and conversions';
+            }
+        }
+    </script>
+</body>
+</html>
