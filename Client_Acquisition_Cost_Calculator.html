@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Acquisition Cost Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2f2f2f;
+            color: #ffffff;
+            padding: 20px;
+        }
+        .calculator {
+            background-color: #4f4f4f;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .input-field {
+            margin-bottom: 20px;
+        }
+        .input-field label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .input-field input {
+            width: 100%;
+            height: 40px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #6f6f6f;
+            color: #ffffff;
+        }
+        .button {
+            width: 100%;
+            height: 40px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #8f8f8f;
+            color: #ffffff;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #9f9f9f;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Client Acquisition Cost Calculator</h2>
+        <div class="input-field">
+            <label for="marketing-budget">Marketing Budget ($)</label>
+            <input type="number" id="marketing-budget" placeholder="Enter marketing budget">
+        </div>
+        <div class="input-field">
+            <label for="number-of-clients">Number of Clients Acquired</label>
+            <input type="number" id="number-of-clients" placeholder="Enter number of clients acquired">
+        </div>
+        <div class="input-field">
+            <label for="sales-revenue">Sales Revenue ($)</label>
+            <input type="number" id="sales-revenue" placeholder="Enter sales revenue">
+        </div>
+        <button class="button" onclick="calculateClientAcquisitionCost()">Calculate</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function calculateClientAcquisitionCost() {
+            const marketingBudget = parseFloat(document.getElementById("marketing-budget").value);
+            const numberOfClients = parseFloat(document.getElementById("number-of-clients").value);
+            const salesRevenue = parseFloat(document.getElementById("sales-revenue").value);
+
+            if (isNaN(marketingBudget) || isNaN(numberOfClients) || isNaN(salesRevenue)) {
+                document.getElementById("result").innerHTML = "Please enter valid numbers";
+                return;
+            }
+
+            if (numberOfClients === 0) {
+                document.getElementById("result").innerHTML = "Cannot calculate Client Acquisition Cost with 0 clients acquired";
+                return;
+            }
+
+            const clientAcquisitionCost = marketingBudget / numberOfClients;
+            const returnOnAdSpend = (salesRevenue / marketingBudget) * 100;
+
+            document.getElementById("result").innerHTML = `Client Acquisition Cost: $${clientAcquisitionCost.toFixed(2)}<br>Return on Ad Spend (ROAS): ${returnOnAdSpend.toFixed(2)}%`;
+        }
+    </script>
+</body>
+</html>
