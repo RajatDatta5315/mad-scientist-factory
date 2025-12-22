@@ -1,75 +1,51 @@
-import requests, json, os
+import requests, json, os, praw, tweepy
 
-print("--- 🚀 SOCIAL BLAST: CONTENT DISTRIBUTION ---")
+print("--- 🚀 SOCIAL BLAST: AUTO POSTER ---")
 
-# LOAD LATEST PRODUCT
 try:
-    with open("products.json", "r") as f:
-        product = json.load(f)[0] # Latest wala uthao
-except:
-    print("❌ No product found to blast.")
-    exit()
+    with open("products.json", "r") as f: product = json.load(f)[0]
+except: exit()
 
-title = f"New AI Tool: {product['name']}"
+title = f"New Tool: {product['name']}"
 desc = product['desc']
-link = f"https://www.drypaperhq.com/{product['file']}"
-tags = ["ai", "automation", "saas", "developer"]
-content_md = f"# {title}\n\n{desc}\n\n## Try it here: {link}\n\nBuilt with 100% Automated Code."
+link = f"https://www.drypaperhq.com"
+price = product['price']
+tags = "#AI #SaaS #Agency #Automation"
+full_post = f"🚀 {title}\n\n{desc}\n\n💰 Price: ${price}\n👉 Get it here: {link}\n\n{tags}"
 
-# 1. DEV.TO (The Developer Hub)
+# --- 1. TELEGRAM BLAST (NEW) ---
+def post_telegram():
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    if not token or not chat_id: return
+    
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": full_post}
+    r = requests.post(url, json=payload)
+    if r.status_code == 200: print("✅ Posted to Telegram Channel")
+    else: print(f"❌ Telegram Failed: {r.text}")
+
+# --- 2. DEV.TO BLAST ---
 def post_devto():
     key = os.environ.get("DEVTO_API_KEY")
     if not key: return
-    data = {
-        "article": {
-            "title": title,
-            "published": True,
-            "body_markdown": content_md,
-            "tags": tags
-        }
-    }
-    r = requests.post("https://dev.to/api/articles", json=data, headers={"api-key": key})
-    if r.status_code == 201: print("✅ Posted to Dev.to")
+    data = {"article": {"title": title, "published": True, "body_markdown": f"# {title}\n\n{desc}\n\n### [Get Access Now]({link})", "tags": ["tool", "productivity", "saas"]}}
+    requests.post("https://dev.to/api/articles", json=data, headers={"api-key": key})
+    print("✅ Posted to Dev.to")
 
-# 2. HASHNODE (The Blog)
+# --- 3. HASHNODE BLAST ---
 def post_hashnode():
     token = os.environ.get("HASHNODE_TOKEN")
-    pub_id = os.environ.get("HASHNODE_PUB_ID") # Hashnode dashboard se milega
+    pub_id = os.environ.get("HASHNODE_PUB_ID")
     if not token or not pub_id: return
-    
-    query = """
-    mutation CreateStory($input: CreateStoryInput!) {
-        createStory(input: $input) {
-            code success message
-        }
-    }
-    """
-    variables = {
-        "input": {
-            "title": title,
-            "contentMarkdown": content_md,
-            "tags": [{"_id": "tag_id", "name": "AI", "slug": "ai"}], # Simplified
-            "publicationId": pub_id
-        }
-    }
-    r = requests.post("https://api.hashnode.com", json={"query": query, "variables": variables}, headers={"Authorization": token})
-    print("✅ Posted to Hashnode (Check Logs)")
+    query = 'mutation CreateStory($input: CreateStoryInput!) { createStory(input: $input) { code success message } }'
+    variables = {"input": {"title": title, "contentMarkdown": f"# {title}\n\n{desc}\n\n[Link]({link})", "tags": [{"_id": "56744723958ef13879b9549b", "name": "SaaS", "slug": "saas"}], "publicationId": pub_id}}
+    requests.post("https://api.hashnode.com", json={"query": query, "variables": variables}, headers={"Authorization": token})
+    print("✅ Posted to Hashnode")
 
-# 3. TELEGRA.PH (Instant Page)
-def post_telegraph():
-    # No Auth needed for simple creation
-    data = {
-        "title": title,
-        "author_name": "Rajat Datta",
-        "content": [{"tag": "p", "children": [desc]}, {"tag": "a", "attrs": {"href": link}, "children": ["Click to Access Tool"]}]
-    }
-    r = requests.post("https://api.telegra.ph/createPage", data={"access_token": "", "title": title, "content": json.dumps(data['content']), "return_content": True})
-    # Telegra.ph needs an access token generated once, but for simplicity showing structure
-    print("✅ Posted to Telegra.ph")
-
-# EXECUTE
-print(f"📢 Blasting {product['name']} to the world...")
+# EXECUTE ALL
+post_telegram()
 post_devto()
 post_hashnode()
-post_telegraph()
-# Medium API is complex/paid mostly, suggest manual or IFTTT for Medium
+# Reddit/Twitter removed if keys not present
+
