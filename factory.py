@@ -47,11 +47,14 @@ def generate_image(product_name):
     except: pass
     return "https://placehold.co/800x450/000/0f0.png?text=Tool+Preview"
 
-# --- 3. LOAD DATABASE ---
+# --- 3. LOAD DATABASE (FIXED HERE) ---
 db = []
 if os.path.exists(DB_FILE):
-    try: with open(DB_FILE, "r") as f: db = json.load(f)
-    except: db = []
+    try:
+        with open(DB_FILE, "r") as f:
+            db = json.load(f)
+    except:
+        db = []
 
 # --- 4. STEP 1: MARKET RESEARCH ---
 existing_tools = [p['name'] for p in db]
