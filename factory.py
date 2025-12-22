@@ -48,8 +48,11 @@ def generate_image(product_name, specific_vibe):
 # --- 3. MARKET RESEARCH ---
 db = []
 if os.path.exists(DB_FILE):
-    try: with open(DB_FILE, "r") as f: db = json.load(f)
-    except: db = []
+    try:
+        with open(DB_FILE, "r") as f:
+            db = json.load(f)
+    except:
+        db = []
 
 existing = [p['name'] for p in db]
 print("🕵️ Researching High-Ticket Trends...")
@@ -107,7 +110,7 @@ rss = """<?xml version="1.0" encoding="UTF-8" ?>
     <link>https://www.drypaperhq.com</link>
     <description>Premium AI Automation Tools</description>
 """
-for item in db[:15]: # Last 15 products
+for item in db[:15]:
     rss += f"""
     <item>
         <g:id>{item['file']}</g:id>
