@@ -1,7 +1,7 @@
 import requests, json, re, sys, os, random, time, urllib.parse
-from email.utils import formatdate # <--- Date formatting ke liye
+from email.utils import formatdate
 
-print("--- 🏭 FACTORY: PREMIUM EDITION (RSS FIX) ---")
+print("--- 🏭 FACTORY: PREMIUM EDITION (FINAL FIX) ---")
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 PAYPAL_EMAIL = os.environ.get("PAYPAL_EMAIL")
@@ -16,10 +16,13 @@ if not GROQ_API_KEY or not PAYPAL_EMAIL:
 # --- LOAD DB & CHECK TIME LOCK ---
 db = []
 if os.path.exists(DB_FILE):
-    try: with open(DB_FILE, "r") as f: db = json.load(f)
-    except: db = []
+    try:
+        with open(DB_FILE, "r") as f: 
+            db = json.load(f)
+    except:
+        db = []
 
-# Logic: One Product Per Week (Keep existing logic)
+# Logic: One Product Per Week
 current_time = int(time.time())
 ONE_WEEK_SECONDS = 604800
 should_generate = True
@@ -84,7 +87,7 @@ for item in db:
 html += "</div></body></html>"
 with open(WEBSITE_FILE, "w") as f: f.write(html)
 
-# --- RSS FEED UPDATE (SUBSTACK FIX) ---
+# --- RSS FEED UPDATE ---
 print("📡 Generating RSS Feed with Dates...")
 rss = """<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
@@ -95,10 +98,8 @@ rss = """<?xml version="1.0" encoding="UTF-8" ?>
     <language>en-us</language>
 """
 for item in db[:15]:
-    # Timestamp handling for valid RSS Date
     ts = item.get('timestamp', int(time.time()))
     pub_date = formatdate(ts)
-    
     rss += f"""
     <item>
         <title>{item['name']}</title>
@@ -106,12 +107,7 @@ for item in db[:15]:
         <guid>https://www.drypaperhq.com/{item.get('file', '')}</guid>
         <pubDate>{pub_date}</pubDate>
         <description>{item['desc']}</description>
-        <content:encoded><![CDATA[
-            <img src="https://www.drypaperhq.com/{item['image']}" />
-            <p>{item['desc']}</p>
-            <p><strong>Price: ${item['price']}</strong></p>
-            <p><a href="{item['link']}">Get Access Now</a></p>
-        ]]></content:encoded>
+        <content:encoded><![CDATA[<img src="https://www.drypaperhq.com/{item['image']}" /><p>{item['desc']}</p><p><strong>Price: ${item['price']}</strong></p><p><a href="{item['link']}">Get Access Now</a></p>]]></content:encoded>
     </item>"""
 rss += "</channel></rss>"
 
