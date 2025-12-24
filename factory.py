@@ -1,9 +1,8 @@
 import requests, json, re, sys, os, random, time, urllib.parse
 
-print("--- 🏭 FACTORY: PREMIUM EDITION (WITH GOOGLE FEED) ---")
+print("--- 🏭 FACTORY: PREMIUM EDITION (7-DAY LOCK) ---")
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-HF_TOKEN = os.environ.get("HF_TOKEN")
 PAYPAL_EMAIL = os.environ.get("PAYPAL_EMAIL")
 DB_FILE = "products.json"
 WEBSITE_FILE = "index.html"
@@ -13,7 +12,34 @@ if not GROQ_API_KEY or not PAYPAL_EMAIL:
     print("❌ Secrets Missing.")
     sys.exit(1)
 
-# --- 1. INTELLIGENT BRAIN ---
+# --- LOAD DB & CHECK TIME LOCK ---
+db = []
+if os.path.exists(DB_FILE):
+    try:
+        with open(DB_FILE, "r") as f: db = json.load(f)
+    except: db = []
+
+# 🔥 LOGIC: ONE PRODUCT PER WEEK
+current_time = int(time.time())
+ONE_WEEK_SECONDS = 604800
+
+if db and len(db) > 0:
+    last_product = db[0]
+    last_created = last_product.get('timestamp', 0)
+    
+    if (current_time - last_created) < ONE_WEEK_SECONDS:
+        print(f"🔒 LOCK ACTIVE: Last product '{last_product['name']}' is less than 7 days old.")
+        print("✅ Skipping new generation. Refreshing site only.")
+        # Proceed to update website only (Skip generation)
+        # Hum niche generation step skip karne ke liye 'should_generate = False' set karenge
+        should_generate = False
+    else:
+        print("🔓 LOCK OPEN: 7 Days passed. Creating NEW Product.")
+        should_generate = True
+else:
+    should_generate = True
+
+# --- FUNCTIONS ---
 def ask_ai(system_prompt, user_prompt):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
@@ -28,14 +54,11 @@ def ask_ai(system_prompt, user_prompt):
     except Exception as e: print(f"⚠️ AI Error: {e}")
     return None
 
-# --- 2. DYNAMIC MOCKUP GENERATOR ---
 def generate_image(product_name, specific_vibe):
     filename = f"mockup_{int(time.time())}.jpg"
     print(f"🎨 Generating Premium Mockup for {product_name}...")
-    
     prompt = f"high quality ui design of {product_name}, {specific_vibe}, dark mode, glassmorphism, glowing neon accents, 8k, behance style, dashboard view"
     encoded = urllib.parse.quote(prompt)
-    
     try:
         url = f"https://image.pollinations.ai/prompt/{encoded}?width=800&height=500&nologo=true&model=flux"
         r = requests.get(url, timeout=15)
@@ -45,55 +68,33 @@ def generate_image(product_name, specific_vibe):
     except: pass
     return "https://placehold.co/800x500/000/0f0.png?text=Premium+Tool"
 
-# --- 3. MARKET RESEARCH ---
-db = []
-if os.path.exists(DB_FILE):
-    try:
-        with open(DB_FILE, "r") as f:
-            db = json.load(f)
-    except:
-        db = []
+# --- GENERATION LOGIC (ONLY IF UNLOCKED) ---
+if should_generate:
+    existing = [p['name'] for p in db]
+    print("🕵️ Researching High-Ticket Trends...")
+    name = ask_ai("Output ONLY the name.", f"Suggest 1 B2B Micro-SaaS Tool Name. NOT in: {existing}. Max 3 words.")
+    name = re.sub(r'[^a-zA-Z0-9 ]', '', name).strip() if name else f"ROI_Tool_{int(time.time())}"
+    print(f"💎 Concept: {name}")
 
-existing = [p['name'] for p in db]
-print("🕵️ Researching High-Ticket Trends...")
+    print("🏗️ Coding Premium Interface...")
+    tool_code = ask_ai("Output ONLY HTML.", f"Write a single-file HTML/JS tool: '{name}'. Dark Theme, Glassmorphism. Real Logic. Output ONLY RAW HTML.")
+    tool_code = tool_code.replace("```html", "").replace("```", "")
+    safe_name = name.replace(" ", "_") + ".html"
+    with open(safe_name, "w") as f: f.write(tool_code)
 
-name = ask_ai("Output ONLY the name.", f"Suggest 1 B2B Micro-SaaS Tool Name (Calculator/Generator/Auditor). NOT in: {existing}. Max 3 words.")
-name = re.sub(r'[^a-zA-Z0-9 ]', '', name).strip() if name else f"ROI_Tool_{int(time.time())}"
-print(f"💎 Concept: {name}")
+    vibe = ask_ai("Output 3 keywords.", f"Describe UI for {name}")
+    img = generate_image(name, vibe)
+    desc = ask_ai("Write 1 killer sales line.", f"Sell {name} to an agency.")
+    price = random.choice(["29", "49", "97"])
 
-# --- 4. PREMIUM CODE ENGINEERING ---
-print("🏗️ Coding Premium Interface...")
-ui_prompt = f"""
-Act as a Top-Tier Frontend Developer. Write a single-file HTML/JS tool: '{name}'.
-DESIGN RULES:
-1. Use a Modern Dark Theme (Black background, #00ff88 accents).
-2. Use 'Glassmorphism' effects.
-3. Use fonts like Inter or Poppins.
-4. Buttons must be gradient and rounded.
-FUNCTIONALITY:
-1. Must be a working {name}.
-2. No fake buttons. Real JS logic.
-Output ONLY RAW HTML.
-"""
-tool_code = ask_ai("Output ONLY HTML.", ui_prompt)
-tool_code = tool_code.replace("```html", "").replace("```", "")
+    file_url = f"https://www.drypaperhq.com/{safe_name}"
+    link = f"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business={PAYPAL_EMAIL}&item_name={urllib.parse.quote(name)}&amount={price}&currency_code=USD&return={urllib.parse.quote(file_url)}"
 
-safe_name = name.replace(" ", "_") + ".html"
-with open(safe_name, "w") as f: f.write(tool_code)
+    # Save with TIMESTAMP for the lock
+    db.insert(0, {"name": name, "desc": desc.replace('"', ''), "price": price, "file": safe_name, "image": img, "link": link, "timestamp": int(time.time())})
+    with open(DB_FILE, "w") as f: json.dump(db, f, indent=2)
 
-# --- 5. PACKAGING ---
-vibe = ask_ai("Output 3 keywords.", f"Describe the UI look for {name} (e.g. 'financial chart', 'code editor').")
-img = generate_image(name, vibe)
-desc = ask_ai("Write 1 killer sales line.", f"Sell {name} to an agency.")
-price = random.choice(["29", "49", "97"])
-
-file_url = f"https://www.drypaperhq.com/{safe_name}"
-link = f"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business={PAYPAL_EMAIL}&item_name={urllib.parse.quote(name)}&amount={price}&currency_code=USD&return={urllib.parse.quote(file_url)}"
-
-db.insert(0, {"name": name, "desc": desc.replace('"', ''), "price": price, "file": safe_name, "image": img, "link": link})
-with open(DB_FILE, "w") as f: json.dump(db, f, indent=2)
-
-# --- 6. UPDATE WEBSITE ---
+# --- UPDATE WEBSITE (ALWAYS RUNS) ---
 print("🌐 Updating Storefront...")
 html = """<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>DryPaper HQ</title><link href='https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap' rel='stylesheet'><style>body{background:#050505;color:#fff;font-family:'Outfit',sans-serif;margin:0}.header{text-align:center;padding:100px 20px}.header h1{font-size:3rem;margin-bottom:10px;background:linear-gradient(to right,#fff,#888);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.grid{max-width:1200px;margin:50px auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:40px;padding:20px}.card{background:#0a0a0a;border:1px solid #222;border-radius:20px;overflow:hidden;transition:0.3s;display:flex;flex-direction:column}.card:hover{border-color:#00ff88;transform:translateY(-10px)}.card img{width:100%;height:220px;object-fit:cover;border-bottom:1px solid #222}.info{padding:25px;flex-grow:1;display:flex;flex-direction:column}.title{font-size:1.4rem;font-weight:bold;margin-bottom:10px}.desc{color:#888;font-size:0.9rem;margin-bottom:20px;line-height:1.5}.footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center}.price{font-size:1.5rem;font-weight:800;color:#fff}.btn{background:#fff;color:#000;padding:10px 25px;border-radius:50px;text-decoration:none;font-weight:bold;transition:0.2s}.btn:hover{background:#00ff88;box-shadow:0 0 15px rgba(0,255,136,0.3)}</style></head><body><div class='header'><h1>DRYPAPER HQ</h1><p style='color:#666'>Premium Utility Assets</p></div><div class='grid'>"""
 for item in db:
@@ -101,31 +102,13 @@ for item in db:
 html += "</div></body></html>"
 with open(WEBSITE_FILE, "w") as f: f.write(html)
 
-# --- 7. UPDATE GOOGLE MERCHANT FEED (RSS) ---
-print("📡 Generating Google Merchant Feed...")
-rss = """<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
-<channel>
-    <title>DryPaper HQ</title>
-    <link>https://www.drypaperhq.com</link>
-    <description>Premium AI Automation Tools</description>
-"""
+# --- UPDATE FEED ---
+print("📡 Updating Feed...")
+rss = """<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"><channel><title>DryPaper HQ</title><link>https://www.drypaperhq.com</link><description>Premium AI Tools</description>"""
 for item in db[:15]:
-    rss += f"""
-    <item>
-        <g:id>{item['file']}</g:id>
-        <g:title>{item['name']}</g:title>
-        <g:description>{item['desc']}</g:description>
-        <g:link>https://www.drypaperhq.com</g:link>
-        <g:image_link>https://www.drypaperhq.com/{item['image']}</g:image_link>
-        <g:condition>new</g:condition>
-        <g:availability>in stock</g:availability>
-        <g:price>{item['price']} USD</g:price>
-        <g:brand>DryPaper</g:brand>
-    </item>"""
+    rss += f"""<item><g:id>{item['file']}</g:id><g:title>{item['name']}</g:title><g:description>{item['desc']}</g:description><g:link>https://www.drypaperhq.com</g:link><g:image_link>https://www.drypaperhq.com/{item['image']}</g:image_link><g:condition>new</g:condition><g:availability>in stock</g:availability><g:price>{item['price']} USD</g:price><g:brand>DryPaper</g:brand></item>"""
 rss += "</channel></rss>"
-
 with open(RSS_FILE, "w") as f: f.write(rss)
 
-print("✅ Factory Upgrade Complete.")
+print("✅ Factory Complete.")
 
