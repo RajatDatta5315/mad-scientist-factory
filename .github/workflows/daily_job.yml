@@ -31,19 +31,27 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python factory.py
 
-      # STEP 2: MARKETING (Cold DMs - 50/day)
+      # STEP 2: MARKETING (Cold DMs - 20/day)
       - name: 📢 Run Marketing
         if: success() 
         env:
-          EMAIL_USER: ${{ secrets.EMAIL_USER }} # For Report
-          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
-          TARGET_EMAIL: ${{ secrets.TARGET_EMAIL }}
-          SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }} # For Sending
+          SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          TARGET_EMAIL: ${{ secrets.TARGET_EMAIL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python marketing.py
 
-      # STEP 3: SAVE (Commit Products & CSV)
+      # STEP 3: DAILY REPORTER (Email Report)
+      - name: 📊 Send Daily Report
+        if: always()
+        env:
+          SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          TARGET_EMAIL: ${{ secrets.TARGET_EMAIL }}
+        run: python reporter.py
+
+      # STEP 4: SAVE (Commit Products & CSV)
       - name: 💾 Save Progress
         if: always()
         run: |
@@ -52,4 +60,16 @@ jobs:
           git add .
           git commit -m "Empire Operations Complete" || echo "No changes"
           git push
+
+      # STEP 5: BACKUP (Download ZIP)
+      - name: 📦 Create Full Backup
+        if: always()
+        run: |
+          zip -r empire_backup.zip . -x ".git/*"
+      
+      - name: Upload Backup Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Empire-Source-Code
+          path: empire_backup.zip
 
