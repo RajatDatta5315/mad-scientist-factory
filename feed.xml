@@ -6,6 +6,17 @@
     <description>Premium AI Automation Tools</description>
 
     <item>
+        <g:id>Profit_Margin_Calculator.html</g:id>
+        <g:title>Profit Margin Calculator</g:title>
+        <g:description>Unlock the secret to maximizing your agency's profitability with our intuitive Profit Margin Calculator, and discover how you can boost your bottom line by up to 30% in just a few clicks, without sacrificing client satisfaction or team efficiency.</g:description>
+        <g:link>https://www.drypaperhq.com</g:link>
+        <g:image_link>https://www.drypaperhq.com/mockup_1766539366.jpg</g:image_link>
+        <g:condition>new</g:condition>
+        <g:availability>in stock</g:availability>
+        <g:price>29 USD</g:price>
+        <g:brand>DryPaper</g:brand>
+    </item>
+    <item>
         <g:id>Revenue_Growth_Calculator.html</g:id>
         <g:title>Revenue Growth Calculator</g:title>
         <g:description>Unlock the secret to predictable profits and transform your agency's bottom line with our Revenue Growth Calculator - the ultimate game-changer that helps you accurately forecast and achieve double-digit growth, while eliminating the guesswork and securing your spot as the go-to expert in your industry.</g:description>

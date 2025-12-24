@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profit Margin Calculator</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            color: #fff;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            width: 300px;
+            margin: 40px auto;
+            backdrop-filter: blur(10px);
+        }
+        .input-field {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(to right, #00ff88, #00bcd4);
+            color: #fff;
+            cursor: pointer;
+        }
+        .button:hover {
+            background: linear-gradient(to right, #00bcd4, #00ff88);
+        }
+        .result {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Profit Margin Calculator</h2>
+        <input type="number" id="revenue" class="input-field" placeholder="Revenue">
+        <input type="number" id="cost" class="input-field" placeholder="Cost of Goods Sold">
+        <button class="button" onclick="calculateProfitMargin()">Calculate</button>
+        <p id="result" class="result"></p>
+    </div>
+    <script>
+        function calculateProfitMargin() {
+            let revenue = parseFloat(document.getElementById("revenue").value);
+            let cost = parseFloat(document.getElementById("cost").value);
+            if (isNaN(revenue) || isNaN(cost)) {
+                document.getElementById("result").innerHTML = "Invalid input";
+                return;
+            }
+            let profitMargin = ((revenue - cost) / revenue) * 100;
+            document.getElementById("result").innerHTML = `Profit Margin: ${profitMargin.toFixed(2)}%`;
+        }
+    </script>
+</body>
+</html>
