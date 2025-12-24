@@ -1,6 +1,7 @@
 import requests, json, re, sys, os, random, time, urllib.parse
+from email.utils import formatdate # <--- Date formatting ke liye
 
-print("--- 🏭 FACTORY: PREMIUM EDITION (7-DAY LOCK) ---")
+print("--- 🏭 FACTORY: PREMIUM EDITION (RSS FIX) ---")
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 PAYPAL_EMAIL = os.environ.get("PAYPAL_EMAIL")
@@ -15,86 +16,67 @@ if not GROQ_API_KEY or not PAYPAL_EMAIL:
 # --- LOAD DB & CHECK TIME LOCK ---
 db = []
 if os.path.exists(DB_FILE):
-    try:
-        with open(DB_FILE, "r") as f: db = json.load(f)
+    try: with open(DB_FILE, "r") as f: db = json.load(f)
     except: db = []
 
-# 🔥 LOGIC: ONE PRODUCT PER WEEK
+# Logic: One Product Per Week (Keep existing logic)
 current_time = int(time.time())
 ONE_WEEK_SECONDS = 604800
+should_generate = True
 
 if db and len(db) > 0:
     last_product = db[0]
     last_created = last_product.get('timestamp', 0)
-    
     if (current_time - last_created) < ONE_WEEK_SECONDS:
-        print(f"🔒 LOCK ACTIVE: Last product '{last_product['name']}' is less than 7 days old.")
-        print("✅ Skipping new generation. Refreshing site only.")
-        # Proceed to update website only (Skip generation)
-        # Hum niche generation step skip karne ke liye 'should_generate = False' set karenge
+        print("🔒 LOCK ACTIVE. Refreshing site & feed only.")
         should_generate = False
-    else:
-        print("🔓 LOCK OPEN: 7 Days passed. Creating NEW Product.")
-        should_generate = True
-else:
-    should_generate = True
 
-# --- FUNCTIONS ---
+# --- AI FUNCTIONS ---
 def ask_ai(system_prompt, user_prompt):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    payload = {
-        "model": "llama-3.3-70b-versatile",
-        "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
-        "temperature": 0.7
-    }
+    payload = {"model": "llama-3.3-70b-versatile", "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]}
     try:
         r = requests.post(url, headers=headers, data=json.dumps(payload))
         if r.status_code == 200: return r.json()['choices'][0]['message']['content'].strip()
-    except Exception as e: print(f"⚠️ AI Error: {e}")
+    except: pass
     return None
 
 def generate_image(product_name, specific_vibe):
     filename = f"mockup_{int(time.time())}.jpg"
-    print(f"🎨 Generating Premium Mockup for {product_name}...")
-    prompt = f"high quality ui design of {product_name}, {specific_vibe}, dark mode, glassmorphism, glowing neon accents, 8k, behance style, dashboard view"
-    encoded = urllib.parse.quote(prompt)
+    prompt = urllib.parse.quote(f"high quality ui design of {product_name}, {specific_vibe}, dark mode, 8k")
     try:
-        url = f"https://image.pollinations.ai/prompt/{encoded}?width=800&height=500&nologo=true&model=flux"
-        r = requests.get(url, timeout=15)
+        url = f"https://image.pollinations.ai/prompt/{prompt}?width=800&height=500&nologo=true&model=flux"
+        r = requests.get(url)
         if r.status_code == 200:
             with open(filename, "wb") as f: f.write(r.content)
             return filename
     except: pass
-    return "https://placehold.co/800x500/000/0f0.png?text=Premium+Tool"
+    return "https://placehold.co/800x500.png"
 
-# --- GENERATION LOGIC (ONLY IF UNLOCKED) ---
+# --- GENERATION ---
 if should_generate:
     existing = [p['name'] for p in db]
-    print("🕵️ Researching High-Ticket Trends...")
-    name = ask_ai("Output ONLY the name.", f"Suggest 1 B2B Micro-SaaS Tool Name. NOT in: {existing}. Max 3 words.")
-    name = re.sub(r'[^a-zA-Z0-9 ]', '', name).strip() if name else f"ROI_Tool_{int(time.time())}"
-    print(f"💎 Concept: {name}")
-
-    print("🏗️ Coding Premium Interface...")
-    tool_code = ask_ai("Output ONLY HTML.", f"Write a single-file HTML/JS tool: '{name}'. Dark Theme, Glassmorphism. Real Logic. Output ONLY RAW HTML.")
+    print("🕵️ Researching Trends...")
+    name = ask_ai("Output ONLY name.", f"Suggest B2B SaaS Tool. NOT in: {existing}")
+    name = re.sub(r'[^a-zA-Z0-9 ]', '', name).strip() if name else f"Tool_{int(time.time())}"
+    
+    tool_code = ask_ai("Output HTML.", f"Code tool: {name}. Dark Theme. Real Logic.")
     tool_code = tool_code.replace("```html", "").replace("```", "")
     safe_name = name.replace(" ", "_") + ".html"
     with open(safe_name, "w") as f: f.write(tool_code)
-
-    vibe = ask_ai("Output 3 keywords.", f"Describe UI for {name}")
-    img = generate_image(name, vibe)
-    desc = ask_ai("Write 1 killer sales line.", f"Sell {name} to an agency.")
-    price = random.choice(["29", "49", "97"])
-
+    
+    img = generate_image(name, "dashboard")
+    desc = ask_ai("Sales line.", f"Sell {name}.")
+    price = random.choice(["29", "49"])
+    
     file_url = f"https://www.drypaperhq.com/{safe_name}"
-    link = f"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business={PAYPAL_EMAIL}&item_name={urllib.parse.quote(name)}&amount={price}&currency_code=USD&return={urllib.parse.quote(file_url)}"
-
-    # Save with TIMESTAMP for the lock
+    link = f"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business={PAYPAL_EMAIL}&item_name={name}&amount={price}&return={file_url}"
+    
     db.insert(0, {"name": name, "desc": desc.replace('"', ''), "price": price, "file": safe_name, "image": img, "link": link, "timestamp": int(time.time())})
     with open(DB_FILE, "w") as f: json.dump(db, f, indent=2)
 
-# --- UPDATE WEBSITE (ALWAYS RUNS) ---
+# --- WEBSITE UPDATE ---
 print("🌐 Updating Storefront...")
 html = """<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>DryPaper HQ</title><link href='https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap' rel='stylesheet'><style>body{background:#050505;color:#fff;font-family:'Outfit',sans-serif;margin:0}.header{text-align:center;padding:100px 20px}.header h1{font-size:3rem;margin-bottom:10px;background:linear-gradient(to right,#fff,#888);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.grid{max-width:1200px;margin:50px auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:40px;padding:20px}.card{background:#0a0a0a;border:1px solid #222;border-radius:20px;overflow:hidden;transition:0.3s;display:flex;flex-direction:column}.card:hover{border-color:#00ff88;transform:translateY(-10px)}.card img{width:100%;height:220px;object-fit:cover;border-bottom:1px solid #222}.info{padding:25px;flex-grow:1;display:flex;flex-direction:column}.title{font-size:1.4rem;font-weight:bold;margin-bottom:10px}.desc{color:#888;font-size:0.9rem;margin-bottom:20px;line-height:1.5}.footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center}.price{font-size:1.5rem;font-weight:800;color:#fff}.btn{background:#fff;color:#000;padding:10px 25px;border-radius:50px;text-decoration:none;font-weight:bold;transition:0.2s}.btn:hover{background:#00ff88;box-shadow:0 0 15px rgba(0,255,136,0.3)}</style></head><body><div class='header'><h1>DRYPAPER HQ</h1><p style='color:#666'>Premium Utility Assets</p></div><div class='grid'>"""
 for item in db:
@@ -102,13 +84,37 @@ for item in db:
 html += "</div></body></html>"
 with open(WEBSITE_FILE, "w") as f: f.write(html)
 
-# --- UPDATE FEED ---
-print("📡 Updating Feed...")
-rss = """<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"><channel><title>DryPaper HQ</title><link>https://www.drypaperhq.com</link><description>Premium AI Tools</description>"""
+# --- RSS FEED UPDATE (SUBSTACK FIX) ---
+print("📡 Generating RSS Feed with Dates...")
+rss = """<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+    <title>DryPaper HQ</title>
+    <link>https://www.drypaperhq.com</link>
+    <description>Premium AI Automation Tools</description>
+    <language>en-us</language>
+"""
 for item in db[:15]:
-    rss += f"""<item><g:id>{item['file']}</g:id><g:title>{item['name']}</g:title><g:description>{item['desc']}</g:description><g:link>https://www.drypaperhq.com</g:link><g:image_link>https://www.drypaperhq.com/{item['image']}</g:image_link><g:condition>new</g:condition><g:availability>in stock</g:availability><g:price>{item['price']} USD</g:price><g:brand>DryPaper</g:brand></item>"""
+    # Timestamp handling for valid RSS Date
+    ts = item.get('timestamp', int(time.time()))
+    pub_date = formatdate(ts)
+    
+    rss += f"""
+    <item>
+        <title>{item['name']}</title>
+        <link>https://www.drypaperhq.com/{item.get('file', '')}</link>
+        <guid>https://www.drypaperhq.com/{item.get('file', '')}</guid>
+        <pubDate>{pub_date}</pubDate>
+        <description>{item['desc']}</description>
+        <content:encoded><![CDATA[
+            <img src="https://www.drypaperhq.com/{item['image']}" />
+            <p>{item['desc']}</p>
+            <p><strong>Price: ${item['price']}</strong></p>
+            <p><a href="{item['link']}">Get Access Now</a></p>
+        ]]></content:encoded>
+    </item>"""
 rss += "</channel></rss>"
-with open(RSS_FILE, "w") as f: f.write(rss)
 
-print("✅ Factory Complete.")
+with open(RSS_FILE, "w") as f: f.write(rss)
+print("✅ Feed Fixed.")
 
