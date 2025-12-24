@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Finder Tool</title>
+    <style>
+        body {
+            background-color: #2c3e50;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            color: #fff;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .input-group input {
+            width: 100%;
+            height: 40px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        .input-group input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .button {
+            width: 100%;
+            height: 40px;
+            background: #4CAF50;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background: #3e8e41;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Lead Finder Tool</h2>
+        <div class="input-group">
+            <label for="companyName">Company Name:</label>
+            <input type="text" id="companyName" placeholder="Enter company name">
+        </div>
+        <div class="input-group">
+            <label for="industry">Industry:</label>
+            <select id="industry">
+                <option value="">Select industry</option>
+                <option value="technology">Technology</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="finance">Finance</option>
+                <option value="marketing">Marketing</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="location">Location:</label>
+            <input type="text" id="location" placeholder="Enter location">
+        </div>
+        <button class="button" onclick="findLeads()">Find Leads</button>
+        <div id="result"></div>
+    </div>
+    <script>
+        function findLeads() {
+            const companyName = document.getElementById('companyName').value;
+            const industry = document.getElementById('industry').value;
+            const location = document.getElementById('location').value;
+            const resultDiv = document.getElementById('result');
+            if (companyName && industry && location) {
+                // Simulating API call to find leads
+                const leads = [
+                    { name: 'John Doe', title: 'CEO', company: companyName, industry: industry, location: location },
+                    { name: 'Jane Doe', title: 'CTO', company: companyName, industry: industry, location: location },
+                    { name: 'Bob Smith', title: 'CMO', company: companyName, industry: industry, location: location },
+                ];
+                const resultHtml = leads.map(lead => {
+                    return `
+                        <p>Name: ${lead.name}</p>
+                        <p>Title: ${lead.title}</p>
+                        <p>Company: ${lead.company}</p>
+                        <p>Industry: ${lead.industry}</p>
+                        <p>Location: ${lead.location}</p>
+                        <hr>
+                    `;
+                }).join('');
+                resultDiv.innerHTML = resultHtml;
+            } else {
+                resultDiv.innerHTML = 'Please fill out all fields';
+            }
+        }
+    </script>
+</body>
+</html>
