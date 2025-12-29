@@ -31,9 +31,9 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python factory.py
 
-      # STEP 2: MARKETING (Cold DMs - 20/day)
+      # STEP 2: MARKETING (SKIPPED FOR SAFETY)
       - name: 📢 Run Marketing
-        if: success() 
+        if: false  # 🔥 YE LINE AAJ KE LIYE HAI. (KAL WAPAS 'success()' KAR DENA)
         env:
           SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
