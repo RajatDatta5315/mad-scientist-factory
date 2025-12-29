@@ -2,7 +2,7 @@ import json, os, smtplib, requests, random, time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-print("--- 🧠 MARKETING: AI SNIPER MODE (SAFE LIMIT 20) ---")
+print("--- 🧠 MARKETING: AI SNIPER MODE (SAFE LIMIT 40) ---")
 
 SMTP_EMAIL = os.environ.get("SMTP_EMAIL")
 SMTP_PASS = os.environ.get("SMTP_PASSWORD")
@@ -67,8 +67,8 @@ def hunt_github_leads():
                                 leads.append(lead_data)
                                 existing_emails.append(email)
                         
-                        # 🔥 STRICT LIMIT: 20 EMAILS ONLY
-                        if len(leads) >= 20: return leads
+                        # 🔥 STRICT LIMIT INCREASED TO 40
+                        if len(leads) >= 40: return leads
         except: pass
     return leads
 
