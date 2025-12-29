@@ -1,22 +1,29 @@
-import requests, json, re, sys, os, random, time, string, urllib.parse
+import requests, json, re, sys, os, random, time, urllib.parse, hashlib, string
 from email.utils import formatdate
 
-print("--- 🏭 FACTORY: SECURE EDITION ---")
+print("--- 🏭 FACTORY: SECURE HASH EDITION ---")
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 PAYPAL_EMAIL = os.environ.get("PAYPAL_EMAIL")
 DB_FILE = "products.json"
 WEBSITE_FILE = "index.html"
-VAULT_FILE = "vault_secret.html" # Founder's Private Access
+VAULT_FILE = "vault_secret.html"
 RSS_FILE = "feed.xml"
 
 if not GROQ_API_KEY or not PAYPAL_EMAIL:
     print("❌ Secrets Missing.")
     sys.exit(1)
 
-# --- UTILS ---
+# --- SECURITY UTILS ---
+def generate_hash(text):
+    return hashlib.sha256(text.encode()).hexdigest()
+
 def random_string(length=8):
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
+
+# --- PASSWORD CONFIG ---
+VAULT_PASSWORD = "nehira8823"
+VAULT_HASH = generate_hash(VAULT_PASSWORD) # Python calculates hash instantly
 
 # --- LOAD DB ---
 db = []
@@ -68,7 +75,7 @@ if should_generate:
     
     # Secure Filename Logic
     secure_id = random_string(10)
-    safe_name = f"Tool_{secure_id}.html" # Example: Tool_a1b2c3d4e5.html
+    safe_name = f"Tool_{secure_id}.html"
     
     tool_code = ask_ai("Output HTML.", f"Code tool: {name}. Dark Theme. One-Page App.")
     tool_code = tool_code.replace("```html", "").replace("```", "")
@@ -78,7 +85,6 @@ if should_generate:
     desc = ask_ai("Sales line.", f"Sell {name}.")
     price = random.choice(["29", "49"])
     
-    # PayPal redirects to the Secure File
     file_url = f"https://www.drypaperhq.com/{safe_name}"
     link = f"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business={PAYPAL_EMAIL}&item_name={name}&amount={price}&return={file_url}"
     
@@ -90,7 +96,7 @@ print("🌐 Updating Storefront...")
 html = """<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>DryPaper HQ</title>
 <link rel="icon" type="image/png" href="Favicon.png">
 <link href='https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap' rel='stylesheet'><style>body{background:#050505;color:#fff;font-family:'Outfit',sans-serif;margin:0}.header{text-align:center;padding:80px 20px}.logo-img{width:80px;height:80px;border-radius:12px;margin-bottom:20px;border:2px solid #00ff88}.header h1{font-size:3rem;margin:0;background:linear-gradient(to right,#fff,#888);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.grid{max-width:1200px;margin:50px auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:40px;padding:20px}.card{background:#0a0a0a;border:1px solid #222;border-radius:20px;overflow:hidden;transition:0.3s}.card:hover{border-color:#00ff88;transform:translateY(-10px)}.card img{width:100%;height:220px;object-fit:cover;border-bottom:1px solid #222}.info{padding:25px}.title{font-size:1.4rem;font-weight:bold;margin-bottom:10px}.desc{color:#888;font-size:0.9rem;margin-bottom:20px}.footer{display:flex;justify-content:space-between;align-items:center}.price{font-size:1.5rem;font-weight:800}.btn{background:#fff;color:#000;padding:10px 25px;border-radius:50px;text-decoration:none;font-weight:bold}.btn:hover{background:#00ff88}.site-footer{text-align:center;padding:50px;border-top:1px solid #222;color:#666;font-size:0.8rem}</style></head><body>
-<div class='header'><img src='Favicon.png' class='logo-img'><h1>DRYPAPER HQ</h1><p style='color:#666'>Premium Utility Assets</p></div><div class='grid'>"""
+<div class='header'><img src='Favicon.png' class='logo-img'><h1>DRYPAPER HQ</h1><p style='color:#666'>Premium Utility Assets for Agencies</p></div><div class='grid'>"""
 
 for item in db:
     html += f"<div class='card'><img src='{item['image']}'><div class='info'><div class='title'>{item['name']}</div><div class='desc'>{item['desc']}</div><div class='footer'><div class='price'>${item['price']}</div><a href='{item['link']}' class='btn'>GET ACCESS</a></div></div></div>"
@@ -98,17 +104,29 @@ for item in db:
 html += """</div><div class='site-footer'><p>DryPaper HQ<br>S.K Gupta Road, Habra, West Bengal 743263, India<br>Contact: drypaperofficial@gmail.com</p><br><p>&copy; 2025 DryPaper Inc.</p></div></body></html>"""
 with open(WEBSITE_FILE, "w") as f: f.write(html)
 
-# --- FOUNDER'S VAULT (SECRET PAGE) ---
-print("🔐 Updating Vault...")
-vault_html = """<!DOCTYPE html><html><head><title>Founder Vault</title><style>body{background:#111;color:#0f0;font-family:monospace;padding:20px}a{color:#fff;text-decoration:none;display:block;padding:10px;border-bottom:1px solid #333}a:hover{background:#222}#content{display:none}</style>
+# --- SECURE VAULT UPDATE (HASHED) ---
+print("🔐 Updating Secure Vault...")
+vault_html = f"""<!DOCTYPE html><html><head><title>Founder Vault</title><style>body{{background:#111;color:#0f0;font-family:monospace;padding:20px}}a{{color:#fff;text-decoration:none;display:block;padding:10px;border-bottom:1px solid #333}}a:hover{{background:#222}}#content{{display:none}}</style>
 <script>
-function check(){
+async function sha256(message) {{
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}}
+
+async function check() {{
     var p = prompt("ENTER ACCESS CODE:");
-    if(p==="nehira8823"){document.getElementById('content').style.display='block';}
-    else{alert("ACCESS DENIED"); window.location.href='https://google.com';}
-}
+    var h = await sha256(p);
+    // Hashed Value (Even if viewed in F12, it is useless)
+    if(h === "{VAULT_HASH}"){{
+        document.getElementById('content').style.display='block';
+    }} else {{
+        alert("ACCESS DENIED"); window.location.href='https://google.com';
+    }}
+}}
 </script>
-</head><body onload="check()"><div id='content'><h1>DRYPAPER ASSET VAULT</h1>"""
+</head><body onload="check()"><div id='content'><h1>DRYPAPER ASSET VAULT (SECURE)</h1>"""
 
 for item in db:
     vault_html += f"<a href='{item.get('file', '#')}' target='_blank'>{item['name']} (View)</a>"
