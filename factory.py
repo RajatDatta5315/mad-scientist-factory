@@ -1,7 +1,7 @@
 import requests, json, re, sys, os, random, time, urllib.parse
 from email.utils import formatdate
 
-print("--- 🏭 FACTORY: PREMIUM EDITION (FINAL FIX) ---")
+print("--- 🏭 FACTORY: PREMIUM EDITION (MERCHANT + LOGO FIX) ---")
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 PAYPAL_EMAIL = os.environ.get("PAYPAL_EMAIL")
@@ -79,12 +79,32 @@ if should_generate:
     db.insert(0, {"name": name, "desc": desc.replace('"', ''), "price": price, "file": safe_name, "image": img, "link": link, "timestamp": int(time.time())})
     with open(DB_FILE, "w") as f: json.dump(db, f, indent=2)
 
-# --- WEBSITE UPDATE ---
+# --- WEBSITE UPDATE (WITH LOGO & FOOTER) ---
 print("🌐 Updating Storefront...")
-html = """<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>DryPaper HQ</title><link href='https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap' rel='stylesheet'><style>body{background:#050505;color:#fff;font-family:'Outfit',sans-serif;margin:0}.header{text-align:center;padding:100px 20px}.header h1{font-size:3rem;margin-bottom:10px;background:linear-gradient(to right,#fff,#888);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.grid{max-width:1200px;margin:50px auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:40px;padding:20px}.card{background:#0a0a0a;border:1px solid #222;border-radius:20px;overflow:hidden;transition:0.3s;display:flex;flex-direction:column}.card:hover{border-color:#00ff88;transform:translateY(-10px)}.card img{width:100%;height:220px;object-fit:cover;border-bottom:1px solid #222}.info{padding:25px;flex-grow:1;display:flex;flex-direction:column}.title{font-size:1.4rem;font-weight:bold;margin-bottom:10px}.desc{color:#888;font-size:0.9rem;margin-bottom:20px;line-height:1.5}.footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center}.price{font-size:1.5rem;font-weight:800;color:#fff}.btn{background:#fff;color:#000;padding:10px 25px;border-radius:50px;text-decoration:none;font-weight:bold;transition:0.2s}.btn:hover{background:#00ff88;box-shadow:0 0 15px rgba(0,255,136,0.3)}</style></head><body><div class='header'><h1>DRYPAPER HQ</h1><p style='color:#666'>Premium Utility Assets</p></div><div class='grid'>"""
+html = """<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>DryPaper HQ</title>
+<link rel="icon" type="image/jpeg" href="favicon.jpg">
+<link href='https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap' rel='stylesheet'><style>body{background:#050505;color:#fff;font-family:'Outfit',sans-serif;margin:0}.header{text-align:center;padding:80px 20px;display:flex;flex-direction:column;align-items:center}.logo-img{width:80px;height:80px;border-radius:12px;margin-bottom:20px;border:2px solid #00ff88;box-shadow:0 0 20px rgba(0,255,136,0.2)}.header h1{font-size:3rem;margin:0;background:linear-gradient(to right,#fff,#888);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.grid{max-width:1200px;margin:50px auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:40px;padding:20px}.card{background:#0a0a0a;border:1px solid #222;border-radius:20px;overflow:hidden;transition:0.3s;display:flex;flex-direction:column}.card:hover{border-color:#00ff88;transform:translateY(-10px)}.card img{width:100%;height:220px;object-fit:cover;border-bottom:1px solid #222}.info{padding:25px;flex-grow:1;display:flex;flex-direction:column}.title{font-size:1.4rem;font-weight:bold;margin-bottom:10px}.desc{color:#888;font-size:0.9rem;margin-bottom:20px;line-height:1.5}.footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center}.price{font-size:1.5rem;font-weight:800;color:#fff}.btn{background:#fff;color:#000;padding:10px 25px;border-radius:50px;text-decoration:none;font-weight:bold;transition:0.2s}.btn:hover{background:#00ff88;box-shadow:0 0 15px rgba(0,255,136,0.3)}.site-footer{text-align:center;padding:50px 20px;border-top:1px solid #222;color:#666;font-size:0.8rem;margin-top:50px}.site-footer a{color:#888;text-decoration:none;margin:0 10px}.site-footer p{margin:5px 0}</style></head><body>
+<div class='header'>
+    <img src='favicon.jpg' class='logo-img' alt='DryPaper Logo'>
+    <h1>DRYPAPER HQ</h1>
+    <p style='color:#666'>Premium Utility Assets for Agencies</p>
+</div>
+<div class='grid'>"""
+
 for item in db:
     html += f"<div class='card'><img src='{item['image']}'><div class='info'><div class='title'>{item['name']}</div><div class='desc'>{item['desc']}</div><div class='footer'><div class='price'>${item['price']}</div><a href='{item['link']}' class='btn'>GET ACCESS</a></div></div></div>"
-html += "</div></body></html>"
+
+html += """</div>
+<div class='site-footer'>
+    <p><strong>DryPaper HQ</strong></p>
+    <p>1209 Orange Street, Wilmington, DE 19801, USA</p>
+    <p>Contact: drypaperofficial@gmail.com</p>
+    <br>
+    <p><a href='#'>Privacy Policy</a> | <a href='#'>Terms of Service</a> | <a href='#'>Refund Policy</a></p>
+    <p>&copy; 2025 DryPaper Inc. All rights reserved.</p>
+</div>
+</body></html>"""
+
 with open(WEBSITE_FILE, "w") as f: f.write(html)
 
 # --- RSS FEED UPDATE ---
