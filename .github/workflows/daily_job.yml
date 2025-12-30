@@ -2,7 +2,7 @@ name: Raja Empire Automation
 
 on:
   schedule:
-    - cron: '30 8 * * *' # 2:00 PM India
+    - cron: '0 14 * * *' # 14:00 UTC = 9:00 AM New York (Peak Business Time)
   workflow_dispatch:
 
 permissions:
@@ -29,11 +29,12 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PAYPAL_EMAIL: ${{ secrets.PAYPAL_EMAIL }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          VAULT_PASSWORD: ${{ secrets.VAULT_PASSWORD }} # Added Secret
         run: python factory.py
 
-      # STEP 2: MARKETING (SKIPPED FOR SAFETY)
+      # STEP 2: MARKETING (RESTORED - US TARGET)
       - name: 📢 Run Marketing
-        if: false  # 🔥 YE LINE AAJ KE LIYE HAI. (KAL WAPAS 'success()' KAR DENA)
+        if: success()  # ✅ FIXED: Back to normal automation
         env:
           SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
