@@ -2,7 +2,7 @@ import json, os, smtplib, requests, random, time, datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-print("--- 🧠 MARKETING: WOLF MODE (LIMIT 40) ---")
+print("--- 🧠 MARKETING: WESTERN SNIPER MODE (USA/EU) ---")
 
 SMTP_EMAIL = os.environ.get("SMTP_EMAIL")
 SMTP_PASS = os.environ.get("SMTP_PASSWORD")
@@ -20,7 +20,7 @@ if not os.path.exists(DB_FILE):
 with open(DB_FILE, "r") as f: db = json.load(f)
 latest = db[0]
 
-# --- AGGRESSIVE PSYCHOLOGY GENERATOR ---
+# --- AGGRESSIVE PSYCHOLOGY GENERATOR (UNCHANGED) ---
 def generate_killer_hook(name, bio, product_name):
     if not GROQ_API_KEY: 
         return f"Stop wasting time on manual tasks. {product_name} fixes it."
@@ -50,10 +50,15 @@ def generate_killer_hook(name, bio, product_name):
     except:
         return f"I saw your GitHub. You are building great things, but your workflow is slow."
 
+# --- UPDATED SNIPER HUNTING (USA/EU TARGETS) ---
 def hunt_github_leads():
-    print("🕵️ Hunting High-Value Targets...")
+    print("🕵️ Hunting High-Value Targets (USA/EU Only)...")
     leads = []
-    keywords = ["agency", "freelancer", "founder", "cto", "tech lead", "architect"] # High paying keywords
+    # High Paying Tech Keywords
+    keywords = ["agency", "freelancer", "founder", "cto", "tech lead", "architect", "manager"] 
+    # Rich Countries Filter
+    locations = ["USA", "United States", "UK", "London", "Canada", "Germany", "California", "New York"]
+    
     headers = {"Accept": "application/vnd.github.v3+json"}
     if GH_TOKEN: headers["Authorization"] = f"token {GH_TOKEN}"
     
@@ -64,13 +69,18 @@ def hunt_github_leads():
 
     for _ in range(5): 
         keyword = random.choice(keywords)
-        url = f"https://api.github.com/search/users?q={keyword}+is:hireable&per_page=100&sort=updated"
+        location = random.choice(locations)
+        
+        # 🔥 MAGIC QUERY: Keyword + Location + Hireable
+        query = f"{keyword} location:\"{location}\" is:hireable"
+        url = f"https://api.github.com/search/users?q={query}&per_page=100&sort=updated"
+        
+        print(f"   🔍 Scanning {location} for '{keyword}'...")
         try:
             r = requests.get(url, headers=headers)
             if r.status_code == 200:
                 data = r.json()
                 if "items" in data:
-                    print(f"   🔍 Scanning sector: '{keyword}'...")
                     for user in data['items']:
                         if len(leads) % 10 == 0: time.sleep(1)
                         u_r = requests.get(user['url'], headers=headers)
@@ -82,13 +92,14 @@ def hunt_github_leads():
                                 bio = profile.get('bio') or "Tech Professional"
                                 leads.append({"email": email, "name": name, "bio": bio})
                                 existing_emails.append(email)
-                                print(f"   🎯 LOCKED TARGET: {email}")
+                                print(f"   🎯 TARGET ACQUIRED ({location}): {email}")
                         
-                        # 🔥 LIMIT INCREASED TO 40
+                        # 🔥 STRICT LIMIT 40
                         if len(leads) >= 40: return leads
         except: pass
     return leads
 
+# --- SAVING & SENDING (UNCHANGED) ---
 def save_leads_to_db(leads):
     if not os.path.exists(LEADS_FILE):
         with open(LEADS_FILE, "w") as f: f.write("email,source,date,status\n")
