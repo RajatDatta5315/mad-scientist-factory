@@ -1,8 +1,9 @@
-import json, os, smtplib, requests, random, time, datetime
+import json, os, smtplib, requests, random, time, re
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import dns.resolver # REQUIREMENT: pip install dnspython
 
-print("--- 🧠 MARKETING: WESTERN SNIPER MODE (USA/EU) ---")
+print("--- 🧠 MARKETING: SNIPER VALIDATION MODE ---")
 
 SMTP_EMAIL = os.environ.get("SMTP_EMAIL")
 SMTP_PASS = os.environ.get("SMTP_PASSWORD")
@@ -13,33 +14,35 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 DB_FILE = "products.json"
 LEADS_FILE = "leads.csv"
 
-if not os.path.exists(DB_FILE):
-    print("⚠️ DB Missing. Skipping.")
-    exit()
-
-with open(DB_FILE, "r") as f: db = json.load(f)
-latest = db[0]
-
-# --- AGGRESSIVE PSYCHOLOGY GENERATOR (UNCHANGED) ---
-def generate_killer_hook(name, bio, product_name):
-    if not GROQ_API_KEY: 
-        return f"Stop wasting time on manual tasks. {product_name} fixes it."
+# --- EMAIL VALIDATION ENGINE ---
+def is_valid_email(email):
+    # 1. Regex Format Check
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        return False
     
-    # ROTATING STRATEGIES (A/B Testing)
-    strategies = [
-        "Pain Agitation", # "You are losing money..."
-        "Authority",      # "Top agencies use this..."
-        "Direct Value",   # "Save 10 hours/week..."
-        "FOMO"            # "Launch price ending soon..."
-    ]
-    strategy = random.choice(strategies)
+    # 2. Block GitHub Noreply & Common Bots
+    if "noreply" in email or "bot" in email or "example" in email:
+        return False
+        
+    # 3. Domain MX Record Check (Is the domain real?)
+    domain = email.split('@')[1]
+    try:
+        records = dns.resolver.resolve(domain, 'MX')
+        return True
+    except:
+        return False
+
+# --- AI HOOK GENERATOR (SOFT CTA) ---
+def generate_soft_hook(name, bio, product_name):
+    if not GROQ_API_KEY: 
+        return f"I built {product_name} to help devs like you."
     
     prompt = f"""
-    Write a 1-sentence aggressive, high-converting opening line for a cold email to {name}.
-    His Bio: "{bio}".
-    Product: "{product_name}" (Automation Tool).
-    STRATEGY: {strategy}.
-    Rule: Be direct, confident, and slightly provocative. No fluff. No "I hope you are well".
+    Write a cold email opening for {name}. Bio: "{bio}".
+    Product: "{product_name}".
+    Goal: Start a conversation, NOT a hard sell.
+    Tone: Peer-to-peer developer, casual, low pressure.
+    Output: Just the first 2 sentences.
     """
     
     url = "https://api.groq.com/openai/v1/chat/completions"
@@ -48,16 +51,14 @@ def generate_killer_hook(name, bio, product_name):
     try:
         return requests.post(url, headers=headers, data=json.dumps(payload)).json()['choices'][0]['message']['content'].strip().replace('"', '')
     except:
-        return f"I saw your GitHub. You are building great things, but your workflow is slow."
+        return f"Saw your work on GitHub. Impressive stuff."
 
-# --- UPDATED SNIPER HUNTING (USA/EU TARGETS) ---
+# --- LEAD HUNTING (WITH VALIDATION) ---
 def hunt_github_leads():
-    print("🕵️ Hunting High-Value Targets (USA/EU Only)...")
+    print("🕵️ Hunting Validated Targets...")
     leads = []
-    # High Paying Tech Keywords
-    keywords = ["agency", "freelancer", "founder", "cto", "tech lead", "architect", "manager"] 
-    # Rich Countries Filter
-    locations = ["USA", "United States", "UK", "London", "Canada", "Germany", "California", "New York"]
+    keywords = ["founder", "cto", "tech lead", "architect", "senior engineer"] 
+    locations = ["USA", "San Francisco", "New York", "London", "Berlin", "Canada"]
     
     headers = {"Accept": "application/vnd.github.v3+json"}
     if GH_TOKEN: headers["Authorization"] = f"token {GH_TOKEN}"
@@ -67,40 +68,40 @@ def hunt_github_leads():
         with open(LEADS_FILE, "r") as f:
             existing_emails = [line.split(",")[0] for line in f.readlines()]
 
-    for _ in range(5): 
+    for _ in range(3): # Reduce loops to focus on quality
         keyword = random.choice(keywords)
         location = random.choice(locations)
-        
-        # 🔥 MAGIC QUERY: Keyword + Location + Hireable
         query = f"{keyword} location:\"{location}\" is:hireable"
-        url = f"https://api.github.com/search/users?q={query}&per_page=100&sort=updated"
+        url = f"https://api.github.com/search/users?q={query}&per_page=50&sort=updated" # Reduced per_page
         
-        print(f"   🔍 Scanning {location} for '{keyword}'...")
         try:
             r = requests.get(url, headers=headers)
             if r.status_code == 200:
                 data = r.json()
                 if "items" in data:
                     for user in data['items']:
-                        if len(leads) % 10 == 0: time.sleep(1)
+                        if len(leads) % 5 == 0: time.sleep(1)
                         u_r = requests.get(user['url'], headers=headers)
                         if u_r.status_code == 200:
                             profile = u_r.json()
                             email = profile.get('email')
-                            if email and "users.noreply" not in email and email not in existing_emails:
-                                name = profile.get('name') or profile.get('login')
-                                bio = profile.get('bio') or "Tech Professional"
-                                leads.append({"email": email, "name": name, "bio": bio})
-                                existing_emails.append(email)
-                                print(f"   🎯 TARGET ACQUIRED ({location}): {email}")
+                            
+                            # 🔥 VALIDATION CHECK
+                            if email and email not in existing_emails:
+                                if is_valid_email(email):
+                                    name = profile.get('name') or profile.get('login')
+                                    bio = profile.get('bio') or "Dev"
+                                    leads.append({"email": email, "name": name, "bio": bio})
+                                    existing_emails.append(email)
+                                    print(f"   ✅ VERIFIED LEAD: {email}")
+                                else:
+                                    print(f"   🗑️ INVALID EMAIL: {email}")
                         
-                        # 🔥 STRICT LIMIT 40
-                        if len(leads) >= 40: return leads
+                        if len(leads) >= 20: return leads # Reduced daily limit to 20 for safety
         except: pass
     return leads
 
-# --- SAVING & SENDING (UNCHANGED) ---
-def save_leads_to_db(leads):
+def save_leads(leads):
     if not os.path.exists(LEADS_FILE):
         with open(LEADS_FILE, "w") as f: f.write("email,source,date,status\n")
     with open(LEADS_FILE, "a") as f:
@@ -108,37 +109,34 @@ def save_leads_to_db(leads):
         for lead in leads:
             f.write(f"{lead['email']},github,{today},sent\n")
 
-def send_cold_email(lead, product_name, price):
+def send_mail(lead, product):
     if not SMTP_EMAIL or not SMTP_PASS: return
     email = lead['email']
     name = lead['name']
     
-    # 🧠 GENERATE KILLER HOOK
-    hook = generate_killer_hook(name, lead['bio'], product_name)
-    print(f"🤖 AI Sniper: {hook}")
-
-    store_link = "https://www.drypaperhq.com"
-    subject = f"Tool to automate your workflow (Launch Deal)"
+    hook = generate_soft_hook(name, lead['bio'], product['name'])
     
-    body = f"""{name},
+    # SOFT SELL TEMPLATE
+    subject = f"Question about your workflow, {name}"
+    body = f"""Hi {name},
 
 {hook}
 
-I built '{product_name}' specifically to kill manual work for developers like you.
-It's currently ${price} (Launch Price). The price doubles next week.
+I'm building an automation tool called {product['name']} and looking for feedback from senior devs.
+It handles the boring stuff so you can focus on code.
 
-Don't waste time.
-👉 Grab it here: {store_link}
+Would you be open to checking it out? No pressure.
+Link: https://www.drypaperhq.com
 
+Cheers,
 Rajat
-Founder, DryPaper HQ
 """
     
     msg = MIMEMultipart()
     msg['From'] = f"Rajat <{SMTP_EMAIL}>"
     msg['To'] = email
     msg['Subject'] = subject
-    if TARGET_EMAIL: msg.add_header('Reply-To', TARGET_EMAIL); msg['Bcc'] = TARGET_EMAIL 
+    if TARGET_EMAIL: msg['Bcc'] = TARGET_EMAIL 
     msg.attach(MIMEText(body, 'plain'))
     
     try:
@@ -147,15 +145,19 @@ Founder, DryPaper HQ
         server.login(SMTP_EMAIL, SMTP_PASS)
         server.sendmail(SMTP_EMAIL, [email, TARGET_EMAIL], msg.as_string())
         server.quit()
-        print(f"🚀 FIRED AT: {email}")
-        time.sleep(random.randint(15, 30)) # Faster fire rate
+        print(f"🚀 SENT: {email}")
+        time.sleep(random.randint(30, 60)) # Increased sleep for safety
     except Exception as e:
-        print(f"❌ MISFIRE: {e}")
+        print(f"❌ ERROR: {e}")
+
+# --- EXECUTION ---
+with open(DB_FILE, "r") as f: db = json.load(f)
+latest = db[0]
 
 fresh_leads = hunt_github_leads()
 if fresh_leads:
-    print(f"⚔️ ENGAGING {len(fresh_leads)} HOSTILES...")
-    save_leads_to_db(fresh_leads)
+    print(f"⚔️ ENGAGING {len(fresh_leads)} VERIFIED LEADS...")
+    save_leads(fresh_leads)
     for lead in fresh_leads:
-        send_cold_email(lead, latest['name'], latest['price'])
+        send_mail(lead, latest)
 
