@@ -1,10 +1,8 @@
 name: Raja Empire Automation
-
 on:
   schedule:
-    - cron: '0 0 * * 1' # Har Monday midnight (UTC) ko apne aap chalega
-  workflow_dispatch: # Isse "Run Workflow" ka button aa jayega manual ke liye
-
+    - cron: '0 0 * * 1' 
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,8 +13,7 @@ jobs:
         with:
           python-version: '3.9'
       - name: Install dependencies
-        run: |
-          pip install requests
+        run: pip install requests Pillow  # <--- Pillow add kar diya
       - name: Run Factory
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
