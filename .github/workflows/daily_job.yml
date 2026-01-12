@@ -2,75 +2,25 @@ name: Raja Empire Automation
 
 on:
   schedule:
-    - cron: '0 14 * * *' # 14:00 UTC = 9:00 AM New York (Peak Business Time)
-  workflow_dispatch:
-
-permissions:
-  contents: write
+    - cron: '0 0 * * 1' # Har Monday midnight (UTC) ko apne aap chalega
+  workflow_dispatch: # Isse "Run Workflow" ka button aa jayega manual ke liye
 
 jobs:
-  run_empire:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.11'
-
-      - name: Install Tools
-        run: pip install requests dnspython  # ✅ FIXED: Added DNS Library
-
-      # STEP 1: FACTORY (Create Product & RSS)
-      - name: 🏭 Run Factory
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          pip install requests
+      - name: Run Factory
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PAYPAL_EMAIL: ${{ secrets.PAYPAL_EMAIL }}
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          VAULT_PASSWORD: ${{ secrets.VAULT_PASSWORD }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: python factory.py
-
-      # STEP 2: MARKETING (RESTORED - US TARGET)
-      - name: 📢 Run Marketing
-        if: success()
-        env:
-          SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          TARGET_EMAIL: ${{ secrets.TARGET_EMAIL }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: python marketing.py
-
-      # STEP 3: DAILY REPORTER (Email Report)
-      - name: 📊 Send Daily Report
-        if: always()
-        env:
-          SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          TARGET_EMAIL: ${{ secrets.TARGET_EMAIL }}
-        run: python reporter.py
-
-      # STEP 4: SAVE (Commit Products & CSV)
-      - name: 💾 Save Progress
-        if: always()
-        run: |
-          git config --global user.name 'Empire Bot'
-          git config --global user.email 'bot@drypaperhq.com'
-          git add .
-          git commit -m "Empire Operations Complete" || echo "No changes"
-          git push
-
-      # STEP 5: BACKUP (Download ZIP)
-      - name: 📦 Create Full Backup
-        if: always()
-        run: |
-          zip -r empire_backup.zip . -x ".git/*"
-      
-      - name: Upload Backup Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Empire-Source-Code
-          path: empire_backup.zip
-
