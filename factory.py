@@ -126,4 +126,20 @@ else:
     except Exception as e: print(f"⚠️ Store Sync Failed: {e}")
 
 print("✅ Operations Complete.")
+# Inject into DryPaper Store (WITH ERROR LOG)
+try:
+    headers = {
+        "apikey": SUPABASE_KEY, 
+        "Authorization": f"Bearer {SUPABASE_KEY}", 
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+    }
+    r = requests.post(f"{SUPABASE_URL}/rest/v1/drypaper_assets", headers=headers, json=new_prod)
+    if r.status_code == 201: 
+        print("✅ LIVE ON STORE!")
+    else:
+        print(f"❌ Supabase Error {r.status_code}: {r.text}")
+except Exception as e: 
+    print(f"⚠️ Store Sync Failed: {e}")
+
 
